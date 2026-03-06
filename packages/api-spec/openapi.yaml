@@ -1,0 +1,1208 @@
+openapi: 3.1.0
+
+info:
+  title: InvoiceFlow API
+  version: 1.0.0
+  description: |
+    REST API for InvoiceFlow — invoice management with OCR extraction,
+    client tracking, and payment processing.
+  contact:
+    name: InvoiceFlow Team
+
+servers:
+  - url: http://localhost:4000/api/v1
+    description: Local development
+  - url: https://api.invoiceflow.app/api/v1
+    description: Production
+
+tags:
+  - name: auth
+    description: Authentication and session management
+  - name: dashboard
+    description: KPI and summary data
+  - name: invoices
+    description: Invoice CRUD and lifecycle
+  - name: clients
+    description: Client management
+  - name: upload
+    description: Document upload and OCR extraction
+  - name: settings
+    description: User and account settings
+
+paths:
+  # ---------------------------------------------------------------------------
+  # Auth
+  # ---------------------------------------------------------------------------
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Register a new user
+      operationId: auth_register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Authenticate with email and password
+      operationId: auth_login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Refresh access token
+      operationId: auth_refresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: New tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/google:
+    post:
+      tags: [auth]
+      summary: Authenticate via Google OAuth
+      operationId: auth_google
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id_token]
+              properties:
+                id_token:
+                  type: string
+                  description: Google ID token from client SDK
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    delete:
+      tags: [auth]
+      summary: Invalidate current session
+      operationId: auth_logout
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Session invalidated
+
+  # ---------------------------------------------------------------------------
+  # Dashboard
+  # ---------------------------------------------------------------------------
+  /dashboard/kpi:
+    get:
+      tags: [dashboard]
+      summary: Get KPI summary for the current period
+      operationId: dashboard_kpi
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [month, quarter, year]
+            default: month
+      responses:
+        '200':
+          description: KPI data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/KpiSummary'
+
+  /dashboard/recent:
+    get:
+      tags: [dashboard]
+      summary: Get recent invoices for dashboard
+      operationId: dashboard_recent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 5
+      responses:
+        '200':
+          description: Recent invoices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invoice'
+
+  # ---------------------------------------------------------------------------
+  # Invoices
+  # ---------------------------------------------------------------------------
+  /invoices:
+    get:
+      tags: [invoices]
+      summary: List invoices
+      operationId: invoice_index
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InvoiceStatus'
+        - name: client_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: from_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to_date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Paginated invoice list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invoice'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      tags: [invoices]
+      summary: Create an invoice
+      operationId: invoice_create
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceCreateRequest'
+      responses:
+        '201':
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Invoice'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /invoices/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+
+    get:
+      tags: [invoices]
+      summary: Get an invoice
+      operationId: invoice_show
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Invoice detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Invoice'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [invoices]
+      summary: Update an invoice
+      operationId: invoice_update
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceUpdateRequest'
+      responses:
+        '200':
+          description: Invoice updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Invoice'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      tags: [invoices]
+      summary: Delete an invoice
+      operationId: invoice_delete
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Invoice deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /invoices/{id}/send:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+    post:
+      tags: [invoices]
+      summary: Send invoice to client by email
+      operationId: invoice_send
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Optional custom message to include in email
+      responses:
+        '200':
+          description: Invoice sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Invoice'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /invoices/{id}/mark_paid:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+    post:
+      tags: [invoices]
+      summary: Mark invoice as paid
+      operationId: invoice_mark_paid
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paid_at:
+                  type: string
+                  format: date-time
+                  description: Payment timestamp (defaults to now)
+                payment_method:
+                  type: string
+                  enum: [bank_transfer, card, cash, other]
+                payment_reference:
+                  type: string
+      responses:
+        '200':
+          description: Invoice marked paid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Invoice'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ---------------------------------------------------------------------------
+  # Clients
+  # ---------------------------------------------------------------------------
+  /clients:
+    get:
+      tags: [clients]
+      summary: List clients
+      operationId: client_index
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: q
+          in: query
+          description: Search by name or email
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated client list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Client'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      tags: [clients]
+      summary: Create a client
+      operationId: client_create
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRequest'
+      responses:
+        '201':
+          description: Client created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Client'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /clients/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+
+    get:
+      tags: [clients]
+      summary: Get a client
+      operationId: client_show
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Client detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Client'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [clients]
+      summary: Update a client
+      operationId: client_update
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRequest'
+      responses:
+        '200':
+          description: Client updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Client'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      tags: [clients]
+      summary: Delete a client
+      operationId: client_delete
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Client deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Upload & Extraction
+  # ---------------------------------------------------------------------------
+  /upload:
+    post:
+      tags: [upload]
+      summary: Upload a document for OCR extraction
+      operationId: upload_create
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF or image file (max 10 MB)
+      responses:
+        '202':
+          description: Upload accepted, extraction job queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ExtractionJob'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /upload/{job_id}:
+    get:
+      tags: [upload]
+      summary: Poll extraction job status
+      operationId: upload_status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ExtractionJob'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Settings
+  # ---------------------------------------------------------------------------
+  /settings:
+    get:
+      tags: [settings]
+      summary: Get current user settings
+      operationId: settings_show
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserSettings'
+
+    put:
+      tags: [settings]
+      summary: Update user settings
+      operationId: settings_update
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettingsRequest'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserSettings'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+# =============================================================================
+# Components
+# =============================================================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: unauthorized
+              message: Invalid or expired token
+              details: {}
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: not_found
+              message: Resource not found
+              details: {}
+
+    UnprocessableEntity:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: validation_failed
+              message: Validation failed
+              details:
+                amount: ['must be greater than 0']
+
+  schemas:
+    # -------------------------------------------------------------------------
+    # Auth
+    # -------------------------------------------------------------------------
+    RegisterRequest:
+      type: object
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+            expires_in:
+              type: integer
+              description: Seconds until access token expiry
+            user:
+              $ref: '#/components/schemas/User'
+
+    # -------------------------------------------------------------------------
+    # User
+    # -------------------------------------------------------------------------
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # -------------------------------------------------------------------------
+    # Invoice
+    # -------------------------------------------------------------------------
+    InvoiceStatus:
+      type: string
+      enum: [draft, sent, paid, overdue, cancelled]
+
+    InvoiceLineItem:
+      type: object
+      required: [description, quantity, unit_price]
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        quantity:
+          type: number
+          minimum: 0
+        unit_price:
+          type: integer
+          description: Amount in minor currency unit (e.g. cents)
+          minimum: 0
+        tax_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+          default: 0
+        amount:
+          type: integer
+          description: Computed total for this line (read-only)
+          readOnly: true
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_number:
+          type: string
+          example: INV-2025-0042
+        status:
+          $ref: '#/components/schemas/InvoiceStatus'
+        client:
+          $ref: '#/components/schemas/Client'
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceLineItem'
+        subtotal:
+          type: integer
+          description: Sum of line amounts before tax (cents)
+        tax_amount:
+          type: integer
+          description: Total tax amount (cents)
+        total:
+          type: integer
+          description: Grand total (cents)
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: KRW
+        issued_at:
+          type: string
+          format: date
+          nullable: true
+        due_at:
+          type: string
+          format: date
+          nullable: true
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        payment_method:
+          type: string
+          nullable: true
+        payment_reference:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        extraction_job_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID of the OCR job that created this invoice, if any
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    InvoiceCreateRequest:
+      type: object
+      required: [client_id, line_items, currency]
+      properties:
+        client_id:
+          type: string
+          format: uuid
+        line_items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InvoiceLineItem'
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          default: KRW
+        issued_at:
+          type: string
+          format: date
+        due_at:
+          type: string
+          format: date
+        notes:
+          type: string
+
+    InvoiceUpdateRequest:
+      type: object
+      properties:
+        client_id:
+          type: string
+          format: uuid
+        line_items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InvoiceLineItem'
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        issued_at:
+          type: string
+          format: date
+        due_at:
+          type: string
+          format: date
+        notes:
+          type: string
+
+    # -------------------------------------------------------------------------
+    # Client
+    # -------------------------------------------------------------------------
+    Client:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        company:
+          type: string
+          nullable: true
+        address:
+          $ref: '#/components/schemas/Address'
+        tax_id:
+          type: string
+          nullable: true
+          description: Business registration number or VAT ID
+        notes:
+          type: string
+          nullable: true
+        invoice_count:
+          type: integer
+          readOnly: true
+        total_billed:
+          type: integer
+          description: Total amount billed in minor currency unit (read-only)
+          readOnly: true
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ClientRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        company:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        tax_id:
+          type: string
+        notes:
+          type: string
+
+    Address:
+      type: object
+      properties:
+        line1:
+          type: string
+          nullable: true
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+          description: ISO 3166-1 alpha-2 code
+
+    # -------------------------------------------------------------------------
+    # Extraction Job
+    # -------------------------------------------------------------------------
+    ExtractionJobStatus:
+      type: string
+      enum: [pending, processing, completed, failed]
+
+    ExtractionJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/ExtractionJobStatus'
+        file_name:
+          type: string
+        file_size:
+          type: integer
+          description: File size in bytes
+        mime_type:
+          type: string
+        extracted_data:
+          type: object
+          nullable: true
+          description: Structured data extracted by OCR (present when status is completed)
+          properties:
+            invoice_number:
+              type: string
+              nullable: true
+            vendor_name:
+              type: string
+              nullable: true
+            issued_at:
+              type: string
+              format: date
+              nullable: true
+            due_at:
+              type: string
+              format: date
+              nullable: true
+            total:
+              type: integer
+              nullable: true
+            currency:
+              type: string
+              nullable: true
+            line_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvoiceLineItem'
+        error_message:
+          type: string
+          nullable: true
+          description: Human-readable error (present when status is failed)
+        invoice_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Created invoice ID after successful extraction and user confirmation
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # -------------------------------------------------------------------------
+    # Settings
+    # -------------------------------------------------------------------------
+    UserSettings:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        default_currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          default: KRW
+        default_tax_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+          default: 10
+        invoice_prefix:
+          type: string
+          example: INV
+        next_invoice_number:
+          type: integer
+          minimum: 1
+        payment_terms_days:
+          type: integer
+          minimum: 0
+          default: 30
+        business_name:
+          type: string
+          nullable: true
+        business_address:
+          $ref: '#/components/schemas/Address'
+        business_tax_id:
+          type: string
+          nullable: true
+        logo_url:
+          type: string
+          format: uri
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+
+    UserSettingsRequest:
+      type: object
+      properties:
+        default_currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        default_tax_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+        invoice_prefix:
+          type: string
+        payment_terms_days:
+          type: integer
+          minimum: 0
+        business_name:
+          type: string
+        business_address:
+          $ref: '#/components/schemas/Address'
+        business_tax_id:
+          type: string
+
+    # -------------------------------------------------------------------------
+    # Dashboard
+    # -------------------------------------------------------------------------
+    KpiSummary:
+      type: object
+      properties:
+        period:
+          type: string
+          enum: [month, quarter, year]
+        total_invoiced:
+          type: integer
+          description: Total invoiced amount in minor currency unit
+        total_paid:
+          type: integer
+          description: Total collected amount in minor currency unit
+        total_outstanding:
+          type: integer
+          description: Total unpaid amount in minor currency unit
+        total_overdue:
+          type: integer
+          description: Total overdue amount in minor currency unit
+        invoice_count:
+          type: integer
+        paid_count:
+          type: integer
+        overdue_count:
+          type: integer
+        currency:
+          type: string
+
+    # -------------------------------------------------------------------------
+    # Shared
+    # -------------------------------------------------------------------------
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        total_pages:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: validation_failed
+            message:
+              type: string
+              example: Validation failed
+            details:
+              type: object
+              additionalProperties: true

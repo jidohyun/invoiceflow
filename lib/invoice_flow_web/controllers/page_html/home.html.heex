@@ -1,0 +1,315 @@
+<%!-- Navigation --%>
+<nav class="fixed w-full z-50 bg-base-100/80 backdrop-blur-md border-b border-base-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <div class="flex-shrink-0 flex items-center gap-2">
+        <span class="material-icons text-primary text-3xl">receipt_long</span>
+        <span class="font-display font-bold text-xl text-neutral tracking-tight">InvoiceFlow</span>
+      </div>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a class="text-sm font-medium hover:text-primary transition-colors" href="#features">Features</a>
+        <a class="text-sm font-medium hover:text-primary transition-colors" href="#how-it-works">How it Works</a>
+        <a class="text-sm font-medium hover:text-primary transition-colors" href="#pricing">Pricing</a>
+      </div>
+
+      <div class="hidden md:flex items-center space-x-4">
+        <a class="text-sm font-medium hover:text-primary transition-colors" href="/users/log_in">Log in</a>
+        <a class="btn btn-primary btn-sm rounded-full px-5 shadow-sm" href="/users/register">Get Started</a>
+      </div>
+
+      <div class="md:hidden flex items-center">
+        <button class="btn btn-ghost btn-square btn-sm">
+          <span class="material-icons">menu</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<%!-- Hero Section --%>
+<section class="pt-32 pb-20 overflow-hidden relative bg-gradient-to-b from-primary/5 to-base-100 dark:from-primary/10 dark:to-base-100">
+  <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-20 dark:opacity-10 pointer-events-none">
+    <div class="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-primary/30 blob-shape blur-3xl"></div>
+    <div class="absolute top-[30%] -left-[10%] w-[500px] h-[500px] bg-info/20 blob-shape blur-3xl" style="animation-delay: -4s;"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+    <h1 class="text-5xl md:text-7xl font-display font-bold text-neutral tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
+      Invoice fast.<br />
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-info italic font-medium">Get paid fearlessly.</span>
+    </h1>
+
+    <p class="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-base-content/80">
+      The automated reminder platform for freelancers and agencies. Let AI handle the follow-ups while you focus on the work.
+    </p>
+
+    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+      <a class="w-full sm:w-auto btn btn-primary btn-lg rounded-full text-lg shadow-lg gap-2 group" href="/users/register">
+        Start Free Trial
+        <span class="material-icons text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      </a>
+      <a class="w-full sm:w-auto btn btn-outline btn-lg rounded-full text-lg" href="#how-it-works">
+        See how it works
+      </a>
+    </div>
+
+    <%!-- App Preview Mockup --%>
+    <div class="mt-20 relative mx-auto max-w-4xl">
+      <div class="aspect-video bg-base-200 rounded-2xl shadow-2xl border border-base-300 p-2 flex flex-col relative overflow-hidden">
+        <div class="h-8 border-b border-base-300 flex items-center px-4 gap-2">
+          <div class="w-3 h-3 rounded-full bg-error/60"></div>
+          <div class="w-3 h-3 rounded-full bg-warning/60"></div>
+          <div class="w-3 h-3 rounded-full bg-success/60"></div>
+        </div>
+        <div class="flex-1 bg-base-100 p-6 flex flex-col gap-4 relative">
+          <div class="h-10 bg-base-200 rounded-lg w-1/3 border border-base-300 shadow-sm"></div>
+          <div class="flex-1 flex gap-4">
+            <div class="w-2/3 bg-base-200 rounded-lg border border-base-300 p-4 shadow-sm flex flex-col gap-3">
+              <div class="h-6 bg-base-300 rounded w-1/4"></div>
+              <div class="h-4 bg-base-300 rounded w-full mt-4"></div>
+              <div class="h-4 bg-base-300 rounded w-5/6"></div>
+              <div class="h-4 bg-base-300 rounded w-4/6"></div>
+            </div>
+            <div class="w-1/3 bg-primary/10 rounded-lg border border-primary/20 p-4 shadow-sm flex flex-col gap-3 items-center justify-center relative overflow-hidden">
+              <span class="material-icons text-primary text-5xl mb-2 relative z-10">document_scanner</span>
+              <div class="h-4 bg-primary/20 rounded w-2/3 relative z-10"></div>
+              <div class="h-4 bg-primary/20 rounded w-1/2 relative z-10"></div>
+              <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-[scan_2s_ease-in-out_infinite]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-warning rounded-full blur-2xl opacity-30 z-[-1]"></div>
+      <div class="absolute -top-6 -left-6 w-32 h-32 bg-primary rounded-full blur-2xl opacity-30 z-[-1]"></div>
+    </div>
+  </div>
+</section>
+
+<%!-- How It Works Section --%>
+<section class="py-24 bg-base-200" id="how-it-works">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-display font-bold text-neutral mb-4">Smart Automation, Zero Complexity</h2>
+      <p class="text-lg text-base-content/70 max-w-2xl mx-auto">We handle the awkward follow-ups so you can maintain great client relationships.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-12 relative">
+      <div class="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-primary/20 via-primary to-primary/20 -translate-y-1/2 z-0"></div>
+
+      <%!-- Step 1 --%>
+      <div class="relative z-10 flex flex-col items-center text-center group">
+        <div class="w-20 h-20 bg-base-100 rounded-2xl flex items-center justify-center shadow-lg border border-base-300 mb-6 group-hover:scale-110 transition-transform duration-300 relative">
+          <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity"></div>
+          <span class="material-icons text-primary text-3xl">smart_toy</span>
+          <div class="absolute -top-3 -right-3 w-8 h-8 bg-primary text-primary-content rounded-full flex items-center justify-center font-bold text-sm border-2 border-base-200">1</div>
+        </div>
+        <h3 class="text-xl font-bold text-neutral mb-3">AI OCR Extraction</h3>
+        <p class="text-base-content/70 text-sm leading-relaxed">
+          Simply forward your PDF invoices. Our AI instantly extracts the due date, amount, and client details with perfect accuracy.
+        </p>
+      </div>
+
+      <%!-- Step 2 --%>
+      <div class="relative z-10 flex flex-col items-center text-center group mt-8 md:mt-0">
+        <div class="w-20 h-20 bg-base-100 rounded-2xl flex items-center justify-center shadow-lg border border-base-300 mb-6 group-hover:scale-110 transition-transform duration-300 relative">
+          <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity"></div>
+          <span class="material-icons text-primary text-3xl">mark_email_read</span>
+          <div class="absolute -top-3 -right-3 w-8 h-8 bg-primary text-primary-content rounded-full flex items-center justify-center font-bold text-sm border-2 border-base-200">2</div>
+        </div>
+        <h3 class="text-xl font-bold text-neutral mb-3">3-Step Reminders</h3>
+        <p class="text-base-content/70 text-sm leading-relaxed">
+          Polite, automated follow-ups sent exactly when needed: 3 days before, on due date, and 3 days late. Fully customizable.
+        </p>
+      </div>
+
+      <%!-- Step 3 --%>
+      <div class="relative z-10 flex flex-col items-center text-center group mt-8 md:mt-0">
+        <div class="w-20 h-20 bg-base-100 rounded-2xl flex items-center justify-center shadow-lg border border-base-300 mb-6 group-hover:scale-110 transition-transform duration-300 relative">
+          <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity"></div>
+          <span class="material-icons text-primary text-3xl">payments</span>
+          <div class="absolute -top-3 -right-3 w-8 h-8 bg-primary text-primary-content rounded-full flex items-center justify-center font-bold text-sm border-2 border-base-200">3</div>
+        </div>
+        <h3 class="text-xl font-bold text-neutral mb-3">Paddle Integration</h3>
+        <p class="text-base-content/70 text-sm leading-relaxed">
+          Seamlessly collect payments. We integrate with Paddle to provide secure payment links directly in your reminder emails.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%!-- Features Section --%>
+<section class="py-24 bg-base-100 overflow-hidden" id="features">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row items-center gap-16">
+      <%!-- Visual --%>
+      <div class="w-full md:w-1/2 relative">
+        <div class="aspect-square max-w-md mx-auto relative z-10">
+          <div class="absolute inset-0 bg-primary/10 rounded-[30%_70%_70%_30%/30%_30%_70%_70%] animate-[morph_10s_ease-in-out_infinite]"></div>
+          <div class="absolute inset-4 bg-info/20 rounded-[70%_30%_30%_70%/70%_70%_30%_30%] animate-[morph_8s_ease-in-out_infinite_reverse]"></div>
+
+          <div class="absolute top-1/4 left-1/4 bg-base-200 p-4 rounded-xl shadow-xl border border-base-300 animate-bounce" style="animation-duration: 3s;">
+            <span class="material-icons text-success">check_circle</span>
+            <span class="text-sm font-bold ml-2 text-neutral">Paid</span>
+          </div>
+
+          <div class="absolute bottom-1/4 right-1/4 bg-base-200 p-4 rounded-xl shadow-xl border border-base-300 animate-bounce" style="animation-duration: 4s; animation-delay: 1s;">
+            <span class="material-icons text-primary">schedule_send</span>
+            <span class="text-sm font-bold ml-2 text-neutral">Sent</span>
+          </div>
+
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-64 bg-base-200 rounded-xl shadow-2xl border border-base-300 p-6 flex flex-col gap-4 transform rotate-6 hover:rotate-0 transition-transform duration-500">
+            <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center self-end mb-4">
+              <span class="material-icons text-primary">receipt</span>
+            </div>
+            <div class="h-4 w-3/4 bg-base-300 rounded"></div>
+            <div class="h-4 w-1/2 bg-base-300 rounded"></div>
+            <div class="h-4 w-full bg-base-300 rounded mt-auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <%!-- Copy --%>
+      <div class="w-full md:w-1/2">
+        <h2 class="text-3xl md:text-4xl font-display font-bold text-neutral mb-6">Built for Modern Freelancers</h2>
+        <p class="text-lg text-base-content/70 mb-8 leading-relaxed">
+          Stop wasting time checking bank accounts and writing awkward follow-up emails. InvoiceFlow acts as your personal accounts receivable assistant.
+        </p>
+        <ul class="space-y-4">
+          <li class="flex items-start">
+            <span class="material-icons text-primary mt-1 mr-3">bolt</span>
+            <div>
+              <h4 class="font-bold text-neutral">Lightning Fast Setup</h4>
+              <p class="text-sm text-base-content/70 mt-1">Connect your email and upload your first invoice in under 2 minutes.</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <span class="material-icons text-primary mt-1 mr-3">palette</span>
+            <div>
+              <h4 class="font-bold text-neutral">White-labeled Emails</h4>
+              <p class="text-sm text-base-content/70 mt-1">Reminders look like they come directly from you, matching your brand voice.</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <span class="material-icons text-primary mt-1 mr-3">insights</span>
+            <div>
+              <h4 class="font-bold text-neutral">Clear Dashboard</h4>
+              <p class="text-sm text-base-content/70 mt-1">See exactly who owes you what, and which reminders are queued up.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%!-- Pricing Section --%>
+<section class="py-24 bg-base-200 relative" id="pricing">
+  <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-info/5 opacity-50 z-0"></div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-display font-bold text-neutral mb-4">Simple, Transparent Pricing</h2>
+      <p class="text-lg text-base-content/70 max-w-2xl mx-auto">Start getting paid faster today. No hidden fees.</p>
+    </div>
+
+    <div class="max-w-lg mx-auto bg-base-100 rounded-2xl shadow-xl border border-primary/20 overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+      <div class="bg-primary text-center py-2">
+        <span class="text-primary-content text-xs font-bold uppercase tracking-wider">Most Popular</span>
+      </div>
+      <div class="p-8">
+        <h3 class="text-2xl font-bold text-neutral text-center mb-2">Starter Plan</h3>
+        <p class="text-center text-base-content/70 text-sm mb-6">Perfect for freelancers and small agencies.</p>
+        <div class="flex justify-center items-baseline mb-8">
+          <span class="text-5xl font-display font-extrabold text-neutral">$9</span>
+          <span class="text-base-content/70 ml-2">/month</span>
+        </div>
+        <ul class="space-y-4 mb-8">
+          <li class="flex items-center">
+            <span class="material-icons text-primary mr-3 text-sm">check</span>
+            <span class="text-base-content">Up to 50 active invoices</span>
+          </li>
+          <li class="flex items-center">
+            <span class="material-icons text-primary mr-3 text-sm">check</span>
+            <span class="text-base-content">AI OCR Data Extraction</span>
+          </li>
+          <li class="flex items-center">
+            <span class="material-icons text-primary mr-3 text-sm">check</span>
+            <span class="text-base-content">Automated 3-Step Reminders</span>
+          </li>
+          <li class="flex items-center">
+            <span class="material-icons text-primary mr-3 text-sm">check</span>
+            <span class="text-base-content">Paddle Payment Integration</span>
+          </li>
+          <li class="flex items-center">
+            <span class="material-icons text-primary mr-3 text-sm">check</span>
+            <span class="text-base-content">Custom Email Templates</span>
+          </li>
+        </ul>
+        <a class="btn btn-primary btn-block btn-lg rounded-xl font-bold shadow-md" href="/users/register">
+          Start 14-Day Free Trial
+        </a>
+        <p class="text-center text-xs text-base-content/60 mt-4">No credit card required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%!-- Footer --%>
+<footer class="bg-base-100 border-t border-base-300 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      <div class="col-span-2 md:col-span-1">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-icons text-primary text-2xl">receipt_long</span>
+          <span class="font-display font-bold text-lg text-neutral">InvoiceFlow</span>
+        </div>
+        <p class="text-sm text-base-content/70 mb-4">
+          Automating accounts receivable for modern freelancers.
+        </p>
+      </div>
+      <div>
+        <h4 class="font-bold text-neutral mb-4 text-sm uppercase tracking-wider">Product</h4>
+        <ul class="space-y-2 text-sm text-base-content/70">
+          <li><a class="hover:text-primary transition-colors" href="#features">Features</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#pricing">Pricing</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#">Integrations</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-neutral mb-4 text-sm uppercase tracking-wider">Resources</h4>
+        <ul class="space-y-2 text-sm text-base-content/70">
+          <li><a class="hover:text-primary transition-colors" href="#">Documentation</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#">Blog</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#">Support</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#">Invoice Templates</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-neutral mb-4 text-sm uppercase tracking-wider">Legal</h4>
+        <ul class="space-y-2 text-sm text-base-content/70">
+          <li><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#">Terms of Service</a></li>
+          <li><a class="hover:text-primary transition-colors" href="#">Security</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-base-300 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="text-sm text-base-content/60">
+        &copy; 2026 InvoiceFlow. All rights reserved.
+      </p>
+      <div class="flex space-x-4">
+        <a class="text-base-content/50 hover:text-primary transition-colors" href="#">
+          <span class="sr-only">Twitter</span>
+          <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path></svg>
+        </a>
+        <a class="text-base-content/50 hover:text-primary transition-colors" href="#">
+          <span class="sr-only">GitHub</span>
+          <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" fill-rule="evenodd"></path></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

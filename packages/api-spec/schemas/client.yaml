@@ -1,0 +1,110 @@
+title: Client
+description: A business or individual that receives invoices.
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    readOnly: true
+    example: 018e1c3a-7f5b-7f8c-9d2e-aabbccddeeff
+
+  name:
+    type: string
+    minLength: 1
+    maxLength: 255
+    example: Acme Corporation
+
+  email:
+    type: string
+    format: email
+    nullable: true
+    example: billing@acme.com
+
+  phone:
+    type: string
+    nullable: true
+    example: '+82-10-1234-5678'
+
+  company:
+    type: string
+    nullable: true
+    description: Company or organisation name (if different from name)
+    example: Acme Corp Ltd.
+
+  address:
+    $ref: '#/$defs/Address'
+
+  tax_id:
+    type: string
+    nullable: true
+    description: Business registration number or VAT ID used on invoices
+    example: '123-45-67890'
+
+  notes:
+    type: string
+    nullable: true
+    description: Internal notes not visible to the client
+
+  invoice_count:
+    type: integer
+    readOnly: true
+    description: Total number of invoices issued to this client
+    example: 12
+
+  total_billed:
+    type: integer
+    readOnly: true
+    description: Cumulative amount billed in minor currency unit
+    example: 15400000
+
+  inserted_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+  updated_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+required:
+  - id
+  - name
+
+$defs:
+  Address:
+    title: Address
+    type: object
+    properties:
+      line1:
+        type: string
+        nullable: true
+        example: 123 Teheran-ro
+
+      line2:
+        type: string
+        nullable: true
+        example: Suite 400
+
+      city:
+        type: string
+        nullable: true
+        example: Gangnam-gu
+
+      state:
+        type: string
+        nullable: true
+        example: Seoul
+
+      postal_code:
+        type: string
+        nullable: true
+        example: '06234'
+
+      country:
+        type: string
+        nullable: true
+        minLength: 2
+        maxLength: 2
+        description: ISO 3166-1 alpha-2 country code
+        example: KR

@@ -1,0 +1,70 @@
+title: Payment
+description: |
+  Records a payment event associated with an invoice.
+  Amounts are stored in the minor currency unit (e.g. cents for USD, won for KRW).
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    readOnly: true
+    example: 018e1c3a-7f5b-7f8c-9d2e-pay000000001
+
+  invoice_id:
+    type: string
+    format: uuid
+    description: The invoice this payment is applied to
+
+  amount:
+    type: integer
+    minimum: 1
+    description: Payment amount in minor currency unit
+    example: 1100000
+
+  currency:
+    type: string
+    minLength: 3
+    maxLength: 3
+    description: ISO 4217 currency code
+    example: KRW
+
+  method:
+    type: string
+    enum: [bank_transfer, card, cash, other]
+    description: Payment method used
+    example: bank_transfer
+
+  reference:
+    type: string
+    nullable: true
+    description: External reference such as bank transaction ID or card approval number
+    example: KEB20250210-00123
+
+  paid_at:
+    type: string
+    format: date-time
+    description: Timestamp when payment was received or confirmed
+    example: '2025-02-10T09:30:00Z'
+
+  notes:
+    type: string
+    nullable: true
+    description: Internal notes about this payment
+
+  inserted_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+  updated_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+required:
+  - id
+  - invoice_id
+  - amount
+  - currency
+  - method
+  - paid_at

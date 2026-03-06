@@ -1,0 +1,162 @@
+title: Invoice
+description: |
+  Represents a billable invoice issued to a client.
+  Amounts are stored in the minor currency unit (e.g. cents for USD, won for KRW).
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    readOnly: true
+    example: 018e1c3a-7f5b-7f8c-9d2e-1a2b3c4d5e6f
+
+  invoice_number:
+    type: string
+    readOnly: true
+    description: Auto-generated sequential number with configurable prefix
+    example: INV-2025-0042
+
+  status:
+    $ref: './invoice_status.yaml'
+
+  client_id:
+    type: string
+    format: uuid
+    description: Reference to the billing client
+
+  client:
+    $ref: './client.yaml'
+    readOnly: true
+
+  line_items:
+    type: array
+    minItems: 1
+    items:
+      $ref: '#/$defs/InvoiceLineItem'
+
+  subtotal:
+    type: integer
+    readOnly: true
+    description: Sum of all line amounts before tax (minor unit)
+    example: 1000000
+
+  tax_amount:
+    type: integer
+    readOnly: true
+    description: Total computed tax (minor unit)
+    example: 100000
+
+  total:
+    type: integer
+    readOnly: true
+    description: Grand total including tax (minor unit)
+    example: 1100000
+
+  currency:
+    type: string
+    minLength: 3
+    maxLength: 3
+    description: ISO 4217 currency code
+    example: KRW
+
+  issued_at:
+    type: string
+    format: date
+    nullable: true
+    example: '2025-01-15'
+
+  due_at:
+    type: string
+    format: date
+    nullable: true
+    example: '2025-02-14'
+
+  paid_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: Timestamp when payment was recorded
+    example: '2025-02-10T09:30:00Z'
+
+  payment_method:
+    type: string
+    enum: [bank_transfer, card, cash, other]
+    nullable: true
+
+  payment_reference:
+    type: string
+    nullable: true
+    description: External reference such as bank transaction ID
+
+  notes:
+    type: string
+    nullable: true
+
+  extraction_job_id:
+    type: string
+    format: uuid
+    nullable: true
+    description: ID of the OCR ExtractionJob that originated this invoice
+
+  inserted_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+  updated_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+required:
+  - id
+  - invoice_number
+  - status
+  - client_id
+  - line_items
+  - subtotal
+  - tax_amount
+  - total
+  - currency
+
+$defs:
+  InvoiceLineItem:
+    title: InvoiceLineItem
+    type: object
+    required: [description, quantity, unit_price]
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+
+      description:
+        type: string
+        minLength: 1
+        maxLength: 500
+        example: Software development - January 2025
+
+      quantity:
+        type: number
+        minimum: 0
+        example: 8
+
+      unit_price:
+        type: integer
+        minimum: 0
+        description: Price per unit in minor currency unit
+        example: 125000
+
+      tax_rate:
+        type: number
+        minimum: 0
+        maximum: 100
+        default: 0
+        description: Tax percentage applied to this line
+        example: 10
+
+      amount:
+        type: integer
+        readOnly: true
+        description: Computed as quantity * unit_price (excluding tax)
+        example: 1000000

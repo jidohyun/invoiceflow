@@ -1,0 +1,48 @@
+title: User
+description: Authenticated InvoiceFlow user account.
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    readOnly: true
+    example: 018e1c3a-7f5b-7f8c-9d2e-000000000001
+
+  email:
+    type: string
+    format: email
+    example: user@example.com
+
+  name:
+    type: string
+    minLength: 1
+    maxLength: 255
+    example: Ji-do Hyun
+
+  avatar_url:
+    type: string
+    format: uri
+    nullable: true
+    description: Profile picture URL (typically from Google OAuth)
+    example: https://lh3.googleusercontent.com/a/example
+
+  google_id:
+    type: string
+    nullable: true
+    readOnly: true
+    description: Google account subject identifier (present for OAuth users)
+
+  inserted_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+  updated_at:
+    type: string
+    format: date-time
+    readOnly: true
+
+required:
+  - id
+  - email
+  - name

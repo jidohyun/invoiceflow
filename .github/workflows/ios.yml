@@ -1,0 +1,26 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/ios/**']
+  pull_request:
+    branches: [main]
+    paths: ['apps/ios/**']
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Test
+        working-directory: apps/ios
+        run: |
+          xcodebuild test \
+            -project InvoiceFlow.xcodeproj \
+            -scheme InvoiceFlow \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -resultBundlePath TestResults \
+            CODE_SIGNING_ALLOWED=NO
