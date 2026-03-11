@@ -2,6 +2,8 @@ package com.invoiceflow.features.invoices.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.invoiceflow.BuildConfig
+import com.invoiceflow.core.data.MockData
 import com.invoiceflow.features.invoices.data.InvoiceRepository
 import com.invoiceflow.features.invoices.data.model.InvoiceDto
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +44,11 @@ class InvoiceViewModel @Inject constructor(
                 val invoices = invoiceRepository.getInvoices()
                 _listState.update { it.copy(invoices = invoices, isLoading = false) }
             } catch (e: Exception) {
-                _listState.update { it.copy(error = e.message ?: "Failed to load invoices", isLoading = false) }
+                if (BuildConfig.DEBUG) {
+                    _listState.update { it.copy(invoices = MockData.invoices, isLoading = false) }
+                } else {
+                    _listState.update { it.copy(error = e.message ?: "Failed to load invoices", isLoading = false) }
+                }
             }
         }
     }
@@ -54,7 +60,12 @@ class InvoiceViewModel @Inject constructor(
                 val invoice = invoiceRepository.getInvoice(id)
                 _detailState.update { it.copy(invoice = invoice, isLoading = false) }
             } catch (e: Exception) {
-                _detailState.update { it.copy(error = e.message ?: "Failed to load invoice", isLoading = false) }
+                if (BuildConfig.DEBUG) {
+                    val mock = MockData.invoices.find { it.id == id } ?: MockData.invoices.first()
+                    _detailState.update { it.copy(invoice = mock, isLoading = false) }
+                } else {
+                    _detailState.update { it.copy(error = e.message ?: "Failed to load invoice", isLoading = false) }
+                }
             }
         }
     }
