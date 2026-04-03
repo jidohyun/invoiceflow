@@ -5,7 +5,7 @@ defmodule AutoMyInvoice.Reminders.Reminder do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @steps [1, 2, 3]
+  @steps [0, 1, 2, 3]
   @statuses ~w(pending scheduled sent cancelled failed)
 
   schema "reminders" do

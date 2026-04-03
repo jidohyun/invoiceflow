@@ -234,6 +234,81 @@ defmodule AutoMyInvoice.RemindersTest do
     end
   end
 
+  describe "send_manual_reminder/1" do
+    test "creates and enqueues manual reminder for sent invoice" do
+      user = create_user()
+      invoice = create_sent_invoice(user)
+
+      assert {:ok, reminder} = Reminders.send_manual_reminder(invoice)
+      assert reminder.step == 0
+      assert reminder.invoice_id == invoice.id
+
+      # With Oban inline testing, the worker runs immediately
+      updated = Repo.get!(Reminder, reminder.id)
+      assert updated.status == "sent"
+      assert updated.sent_at != nil
+    end
+
+    test "creates and enqueues manual reminder for overdue invoice" do
+      user = create_user()
+      invoice = create_sent_invoice(user)
+
+      {:ok, overdue} = Invoices.mark_as_overdue(invoice)
+      overdue = Repo.preload(overdue, :client)
+
+      assert {:ok, reminder} = Reminders.send_manual_reminder(overdue)
+      assert reminder.step == 0
+
+      updated = Repo.get!(Reminder, reminder.id)
+      assert updated.status == "sent"
+    end
+
+    test "rejects for draft invoice" do
+      user = create_user()
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{
+          name: "Draft Client",
+          email: "draft-#{System.unique_integer([:positive])}@example.com",
+          company: "Corp",
+          timezone: "UTC"
+        })
+
+      {:ok, invoice} =
+        Invoices.create_invoice(user, %{
+          amount: Decimal.new("1000.00"),
+          currency: "USD",
+          due_date: Date.add(Date.utc_today(), 30),
+          client_id: client.id,
+          items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+        })
+
+      invoice = Repo.preload(invoice, :client)
+
+      assert {:error, :invalid_status} = Reminders.send_manual_reminder(invoice)
+    end
+
+    test "rejects for paid invoice" do
+      user = create_user()
+      invoice = create_sent_invoice(user)
+      {:ok, paid} = Invoices.mark_as_paid(invoice)
+      paid = Repo.preload(paid, :client)
+
+      assert {:error, :invalid_status} = Reminders.send_manual_reminder(paid)
+    end
+
+    test "rate limits to once per day per invoice" do
+      user = create_user()
+      invoice = create_sent_invoice(user)
+
+      # First send succeeds (inline Oban sets sent_at automatically)
+      assert {:ok, _reminder} = Reminders.send_manual_reminder(invoice)
+
+      # Second send on same day is rate limited
+      assert {:error, :rate_limited} = Reminders.send_manual_reminder(invoice)
+    end
+  end
+
   describe "list_reminders_for_invoice/1" do
     test "returns reminders ordered by step" do
       user = create_user()

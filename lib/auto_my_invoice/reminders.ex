@@ -39,6 +39,54 @@ defmodule AutoMyInvoice.Reminders do
     {:ok, reminders}
   end
 
+  ## 수동 리마인더
+
+  @manual_allowed_statuses ~w(sent overdue partially_paid)
+
+  @spec send_manual_reminder(map()) :: {:ok, Reminder.t()} | {:error, :invalid_status | :rate_limited}
+  def send_manual_reminder(%{status: status} = _invoice) when status not in @manual_allowed_statuses do
+    {:error, :invalid_status}
+  end
+
+  def send_manual_reminder(%{id: invoice_id} = _invoice) do
+    today = Date.utc_today()
+    today_start = DateTime.new!(today, ~T[00:00:00], "Etc/UTC")
+    today_end = DateTime.new!(Date.add(today, 1), ~T[00:00:00], "Etc/UTC")
+
+    already_sent_today =
+      from(r in Reminder,
+        where: r.invoice_id == ^invoice_id,
+        where: r.step == 0,
+        where: r.sent_at >= ^today_start and r.sent_at < ^today_end
+      )
+      |> Repo.exists?()
+
+    if already_sent_today do
+      {:error, :rate_limited}
+    else
+      # Remove previous step=0 reminder to avoid unique constraint violation
+      from(r in Reminder,
+        where: r.invoice_id == ^invoice_id,
+        where: r.step == 0
+      )
+      |> Repo.delete_all()
+
+      now = DateTime.truncate(DateTime.utc_now(), :second)
+
+      {:ok, reminder} =
+        %Reminder{invoice_id: invoice_id}
+        |> Reminder.changeset(%{step: 0, scheduled_at: now, status: "scheduled"})
+        |> Repo.insert()
+
+      {:ok, _oban_job} =
+        %{reminder_id: reminder.id}
+        |> ReminderWorker.new()
+        |> Oban.insert()
+
+      {:ok, reminder}
+    end
+  end
+
   ## 취소
 
   @spec cancel_pending_reminders(binary()) :: {integer(), nil}
@@ -147,6 +195,10 @@ defmodule AutoMyInvoice.Reminders do
       {:ok, dt} -> DateTime.shift_zone!(dt, "UTC")
       {:ambiguous, dt, _} -> DateTime.shift_zone!(dt, "UTC")
       {:gap, _, dt} -> DateTime.shift_zone!(dt, "UTC")
+      {:error, _} ->
+        # Timezone not found, fall back to UTC
+        {:ok, dt} = DateTime.from_naive(naive, "UTC")
+        dt
     end
   end
 

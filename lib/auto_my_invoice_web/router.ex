@@ -62,6 +62,8 @@ defmodule AutoMyInvoiceWeb.Router do
     resources "/invoices", InvoiceController, except: [:new, :edit]
     post "/invoices/:id/send", InvoiceController, :send_invoice
     post "/invoices/:id/mark_paid", InvoiceController, :mark_paid
+    post "/invoices/:id/record_payment", InvoiceController, :record_payment
+    post "/invoices/:id/send_reminder", InvoiceController, :send_reminder
 
     # Clients
     resources "/clients", ClientController, except: [:new, :edit]

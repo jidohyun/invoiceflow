@@ -281,6 +281,101 @@ defmodule AutoMyInvoice.InvoicesTest do
     end
   end
 
+  describe "record_payment/2" do
+    test "records partial payment and transitions to partially_paid" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      assert {:ok, %Invoice{} = updated} = Invoices.record_payment(sent, %{"amount" => "400.00"})
+      assert updated.status == "partially_paid"
+      assert Decimal.eq?(updated.paid_amount, Decimal.new("400.00"))
+      assert is_nil(updated.paid_at)
+    end
+
+    test "records full payment and transitions to paid" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      assert {:ok, %Invoice{} = updated} = Invoices.record_payment(sent, %{"amount" => "1000.00"})
+      assert updated.status == "paid"
+      assert Decimal.eq?(updated.paid_amount, Decimal.new("1000.00"))
+      assert updated.paid_at != nil
+    end
+
+    test "rejects overpayment" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      assert {:error, :overpayment} = Invoices.record_payment(sent, %{"amount" => "1500.00"})
+    end
+
+    test "rejects zero or negative amount" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      assert {:error, :invalid_amount} = Invoices.record_payment(sent, %{"amount" => "0"})
+      assert {:error, :invalid_amount} = Invoices.record_payment(sent, %{"amount" => "-100"})
+    end
+
+    test "rejects payment on already paid invoice" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+      {:ok, paid} = Invoices.mark_as_paid(sent)
+
+      assert {:error, :invalid_status} = Invoices.record_payment(paid, %{"amount" => "100"})
+    end
+
+    test "rejects payment on draft invoice" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+
+      assert {:error, :invalid_status} = Invoices.record_payment(invoice, %{"amount" => "100"})
+    end
+
+    test "cancels reminders when fully paid" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      assert {:ok, %Invoice{} = updated} = Invoices.record_payment(sent, %{"amount" => "1000.00"})
+      assert updated.status == "paid"
+
+      reminders = AutoMyInvoice.Reminders.list_reminders_for_invoice(updated.id)
+      assert Enum.all?(reminders, fn r -> r.status == "cancelled" end)
+    end
+
+    test "resets overdue_notified_at on partial payment" do
+      %{user: user} = create_user()
+      client = create_client(user)
+      {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+      {:ok, overdue} = Invoices.mark_as_overdue(sent)
+
+      overdue
+      |> Ecto.Changeset.change(overdue_notified_at: DateTime.truncate(DateTime.utc_now(), :second))
+      |> AutoMyInvoice.Repo.update!()
+
+      overdue = Invoices.get_invoice!(user.id, overdue.id)
+      assert overdue.overdue_notified_at != nil
+
+      assert {:ok, %Invoice{} = updated} = Invoices.record_payment(overdue, %{"amount" => "400.00"})
+      assert updated.status == "partially_paid"
+      assert is_nil(updated.overdue_notified_at)
+    end
+  end
+
   describe "update_invoice/2" do
     test "updates invoice fields" do
       %{user: user} = create_user()

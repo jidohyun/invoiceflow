@@ -105,7 +105,7 @@ defmodule AutoMyInvoice.Invoices.Invoice do
     "draft" => ~w(sent cancelled),
     "sent" => ~w(overdue partially_paid paid cancelled),
     "overdue" => ~w(partially_paid paid cancelled),
-    "partially_paid" => ~w(paid cancelled),
+    "partially_paid" => ~w(overdue paid cancelled),
     "paid" => [],
     "cancelled" => ["draft"]
   }

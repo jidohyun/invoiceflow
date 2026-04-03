@@ -40,6 +40,50 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
     |> text_body(text)
   end
 
+  # Step 0: Manual reminder (friendly tone, distinct subject)
+  defp content_for_step(0, assigns) do
+    subject = "Payment reminder: Invoice #{assigns.invoice_number}"
+
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8" />#{styles()}</head>
+    <body>
+      <div class="header">Payment Reminder</div>
+      <p>Hi #{assigns.client_name},</p>
+      <p>This is a friendly reminder that invoice <strong>#{assigns.invoice_number}</strong> for
+      <strong>#{assigns.amount}</strong> was due on <strong>#{assigns.due_date}</strong>.</p>
+      <div class="details">
+        <div class="row"><span class="label">Invoice</span><span>#{assigns.invoice_number}</span></div>
+        <div class="row"><span class="label">Amount Due</span><span class="amount">#{assigns.amount}</span></div>
+        <div class="row"><span class="label">Due Date</span><span>#{assigns.due_date}</span></div>
+      </div>
+      <p>If you've already sent payment, please disregard this message. Otherwise, we'd appreciate
+      payment at your earliest convenience.</p>
+      #{pay_now_button(assigns.payment_link)}
+      <p>Thanks so much!</p>
+      #{footer()}
+    </body>
+    </html>
+    """
+
+    text = """
+    Hi #{assigns.client_name},
+
+    This is a friendly reminder that invoice #{assigns.invoice_number} for #{assigns.amount} was due on #{assigns.due_date}.
+
+    If you've already sent payment, please disregard this message.
+    Otherwise, we'd appreciate payment at your earliest convenience.
+    #{pay_now_text(assigns.payment_link)}
+    Thanks so much!
+
+    --
+    AutoMyInvoice
+    """
+
+    {subject, html, text}
+  end
+
   # Step 1 (D+1): Friendly check-in
   defp content_for_step(1, assigns) do
     subject = "Friendly reminder: Invoice #{assigns.invoice_number} — #{assigns.amount}"

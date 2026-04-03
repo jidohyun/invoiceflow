@@ -84,6 +84,111 @@ defmodule AutoMyInvoiceWeb.Api.InvoiceControllerTest do
     end
   end
 
+  describe "POST /api/v1/invoices/:id/record_payment" do
+    test "records partial payment", %{conn: conn, user: user, client: client} do
+      {:ok, invoice} =
+        Invoices.create_invoice(user, %{
+          client_id: client.id,
+          amount: Decimal.new("1000"),
+          currency: "USD",
+          due_date: Date.add(Date.utc_today(), 30)
+        })
+
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      conn = post(conn, "/api/v1/invoices/#{sent.id}/record_payment", %{"amount" => "400.00"})
+
+      assert %{"data" => data} = json_response(conn, 200)
+      assert data["status"] == "partially_paid"
+    end
+
+    test "records full payment", %{conn: conn, user: user, client: client} do
+      {:ok, invoice} =
+        Invoices.create_invoice(user, %{
+          client_id: client.id,
+          amount: Decimal.new("500"),
+          currency: "USD",
+          due_date: Date.add(Date.utc_today(), 30)
+        })
+
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      conn = post(conn, "/api/v1/invoices/#{sent.id}/record_payment", %{"amount" => "500.00"})
+
+      assert %{"data" => data} = json_response(conn, 200)
+      assert data["status"] == "paid"
+    end
+
+    test "rejects overpayment", %{conn: conn, user: user, client: client} do
+      {:ok, invoice} =
+        Invoices.create_invoice(user, %{
+          client_id: client.id,
+          amount: Decimal.new("500"),
+          currency: "USD",
+          due_date: Date.add(Date.utc_today(), 30)
+        })
+
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      conn = post(conn, "/api/v1/invoices/#{sent.id}/record_payment", %{"amount" => "999.00"})
+
+      assert %{"error" => _} = json_response(conn, 422)
+    end
+
+    test "rejects payment on draft invoice", %{conn: conn, user: user, client: client} do
+      {:ok, invoice} =
+        Invoices.create_invoice(user, %{
+          client_id: client.id,
+          amount: Decimal.new("500"),
+          currency: "USD",
+          due_date: Date.add(Date.utc_today(), 30)
+        })
+
+      conn = post(conn, "/api/v1/invoices/#{invoice.id}/record_payment", %{"amount" => "100.00"})
+
+      assert %{"error" => _} = json_response(conn, 422)
+    end
+
+    test "returns 404 for non-existent invoice", %{conn: conn} do
+      conn = post(conn, "/api/v1/invoices/#{Ecto.UUID.generate()}/record_payment", %{"amount" => "100.00"})
+      assert json_response(conn, 404)
+    end
+  end
+
+  describe "POST /api/v1/invoices/:id/send_reminder" do
+    test "sends manual reminder successfully", %{conn: conn, user: user, client: client} do
+      {:ok, invoice} =
+        Invoices.create_invoice(user, %{
+          client_id: client.id,
+          amount: Decimal.new("1000"),
+          currency: "USD",
+          due_date: Date.add(Date.utc_today(), 30),
+          items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+        })
+
+      {:ok, sent} = Invoices.mark_as_sent(invoice)
+
+      conn = post(conn, "/api/v1/invoices/#{sent.id}/send_reminder")
+
+      assert %{"data" => %{"message" => _}} = json_response(conn, 200)
+    end
+
+    test "rejects for draft invoice", %{conn: conn, user: user, client: client} do
+      {:ok, invoice} =
+        Invoices.create_invoice(user, %{
+          client_id: client.id,
+          amount: Decimal.new("1000"),
+          currency: "USD",
+          due_date: Date.add(Date.utc_today(), 30),
+          items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+        })
+
+      conn = post(conn, "/api/v1/invoices/#{invoice.id}/send_reminder")
+
+      assert %{"error" => _} = json_response(conn, 422)
+    end
+  end
+
   describe "DELETE /api/v1/invoices/:id" do
     test "deletes draft invoice", %{conn: conn, user: user, client: client} do
       {:ok, invoice} =

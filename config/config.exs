@@ -41,7 +41,8 @@ config :auto_my_invoice, Oban,
     Oban.Plugins.Pruner,
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 * * * *", AutoMyInvoice.Workers.ReminderScheduler}
+       {"0 * * * *", AutoMyInvoice.Workers.ReminderScheduler},
+       {"0 9 * * *", AutoMyInvoice.Workers.OverdueScanner}
      ]}
   ]
 

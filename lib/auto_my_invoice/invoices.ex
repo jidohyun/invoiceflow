@@ -96,17 +96,38 @@ defmodule AutoMyInvoice.Invoices do
   end
 
   def send_invoice(%Invoice{} = invoice) do
-    with {:ok, sent_invoice} <- mark_as_sent(invoice),
-         sent_invoice <- maybe_create_payment_link(sent_invoice),
-         {:ok, _reminders} <- Reminders.schedule_reminders(sent_invoice),
-         from_email <- sender_email(),
-         email <- InvoiceEmail.invoice_sent(%{
-           invoice: sent_invoice,
-           client: sent_invoice.client,
-           from_email: from_email
-         }) do
-      Mailer.deliver(email)
-      {:ok, sent_invoice}
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.update(:mark_sent,
+        invoice
+        |> Invoice.status_changeset("sent")
+        |> Ecto.Changeset.put_change(:sent_at, DateTime.truncate(DateTime.utc_now(), :second))
+      )
+      |> Ecto.Multi.run(:schedule_reminders, fn _repo, %{mark_sent: sent_invoice} ->
+        sent_invoice = Repo.preload(sent_invoice, :client)
+        Reminders.schedule_reminders(sent_invoice)
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, %{mark_sent: sent_invoice}} ->
+        broadcast_invoice_change(sent_invoice)
+        sent_invoice = maybe_create_payment_link(Repo.preload(sent_invoice, :client))
+
+        email =
+          InvoiceEmail.invoice_sent(%{
+            invoice: sent_invoice,
+            client: sent_invoice.client,
+            from_email: sender_email()
+          })
+
+        Mailer.deliver(email)
+        {:ok, sent_invoice}
+
+      {:error, :mark_sent, changeset, _} ->
+        {:error, changeset}
+
+      {:error, :schedule_reminders, reason, _} ->
+        {:error, reason}
     end
   end
 
@@ -126,8 +147,76 @@ defmodule AutoMyInvoice.Invoices do
     end
   end
 
+  @spec record_payment(Invoice.t(), map()) :: {:ok, Invoice.t()} | {:error, atom()}
+  def record_payment(%Invoice{status: status}, _attrs)
+      when status not in ["sent", "overdue", "partially_paid"] do
+    {:error, :invalid_status}
+  end
+
+  def record_payment(%Invoice{} = invoice, %{"amount" => amount}) do
+    amount = to_decimal(amount)
+    remaining = Decimal.sub(invoice.amount, invoice.paid_amount)
+
+    cond do
+      Decimal.compare(amount, Decimal.new(0)) != :gt ->
+        {:error, :invalid_amount}
+
+      Decimal.compare(amount, remaining) == :gt ->
+        {:error, :overpayment}
+
+      true ->
+        multi =
+          Ecto.Multi.new()
+          |> Ecto.Multi.update_all(:atomic_update,
+            from(i in Invoice,
+              where: i.id == ^invoice.id,
+              update: [set: [paid_amount: fragment("? + ?", i.paid_amount, ^amount)]]
+            ),
+            []
+          )
+          |> Ecto.Multi.run(:invoice, fn repo, _changes ->
+            {:ok, repo.get!(Invoice, invoice.id)}
+          end)
+          |> Ecto.Multi.run(:transition, fn repo, %{invoice: updated} ->
+            if Decimal.compare(updated.paid_amount, updated.amount) != :lt do
+              updated
+              |> Ecto.Changeset.change(
+                status: "paid",
+                paid_at: DateTime.truncate(DateTime.utc_now(), :second)
+              )
+              |> repo.update()
+            else
+              updated
+              |> Ecto.Changeset.change(
+                status: "partially_paid",
+                overdue_notified_at: nil
+              )
+              |> repo.update()
+            end
+          end)
+
+        case Repo.transaction(multi) do
+          {:ok, %{transition: updated}} ->
+            if updated.status == "paid" do
+              Reminders.cancel_pending_reminders(updated.id)
+            end
+
+            broadcast_invoice_change(updated)
+            {:ok, updated}
+
+          {:error, _, reason, _} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  defp to_decimal(%Decimal{} = d), do: d
+  defp to_decimal(n) when is_float(n), do: Decimal.from_float(n)
+  defp to_decimal(n) when is_integer(n), do: Decimal.new(n)
+  defp to_decimal(n) when is_binary(n), do: Decimal.new(n)
+
   @spec mark_as_overdue(Invoice.t()) :: {:ok, Invoice.t()}
-  def mark_as_overdue(%Invoice{status: "sent"} = invoice) do
+  def mark_as_overdue(%Invoice{status: status} = invoice) when status in ["sent", "partially_paid"] do
     invoice
     |> Invoice.status_changeset("overdue")
     |> Repo.update()
@@ -162,9 +251,10 @@ defmodule AutoMyInvoice.Invoices do
   end
 
   @doc """
-  Returns {total_outstanding_amount, overdue_count} for invoices with status sent or overdue.
+  Returns {total_outstanding_amount, overdue_count, primary_currency} for invoices with status sent or overdue.
+  The primary_currency is the most frequently used currency among outstanding invoices.
   """
-  @spec total_outstanding(map()) :: {Decimal.t(), non_neg_integer()}
+  @spec total_outstanding(map()) :: {Decimal.t(), non_neg_integer(), String.t()}
   def total_outstanding(user) do
     result =
       from(i in Invoice,
@@ -181,7 +271,18 @@ defmodule AutoMyInvoice.Invoices do
       )
       |> Repo.one()
 
-    {result.total || Decimal.new(0), result.overdue_count || 0}
+    primary_currency =
+      from(i in Invoice,
+        where: i.user_id == ^user.id,
+        where: i.status in ~w(sent overdue),
+        group_by: i.currency,
+        order_by: [desc: count(i.id)],
+        limit: 1,
+        select: i.currency
+      )
+      |> Repo.one()
+
+    {result.total || Decimal.new(0), result.overdue_count || 0, primary_currency || "USD"}
   end
 
   @doc """

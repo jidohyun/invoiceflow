@@ -2,6 +2,7 @@ defmodule AutoMyInvoiceWeb.Api.InvoiceController do
   use AutoMyInvoiceWeb, :controller
 
   alias AutoMyInvoice.Invoices
+  alias AutoMyInvoice.Reminders
   alias AutoMyInvoiceWeb.Api.{JsonHelpers, FallbackController}
 
   action_fallback FallbackController
@@ -103,6 +104,62 @@ defmodule AutoMyInvoiceWeb.Api.InvoiceController do
       {:ok, paid} ->
         paid = Invoices.get_invoice!(user.id, paid.id)
         json(conn, %{data: JsonHelpers.render_invoice(paid)})
+
+      error ->
+        error
+    end
+  rescue
+    Ecto.NoResultsError -> {:error, :not_found}
+  end
+
+  def record_payment(conn, %{"id" => id, "amount" => amount}) do
+    user = conn.assigns.current_user
+    invoice = Invoices.get_invoice!(user.id, id)
+
+    case Invoices.record_payment(invoice, %{"amount" => amount}) do
+      {:ok, updated} ->
+        updated = Invoices.get_invoice!(user.id, updated.id)
+        json(conn, %{data: JsonHelpers.render_invoice(updated)})
+
+      {:error, :invalid_status} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "이 상태에서는 결제를 기록할 수 없습니다"})
+
+      {:error, :invalid_amount} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "유효하지 않은 금액입니다"})
+
+      {:error, :overpayment} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "결제 금액이 잔액을 초과합니다"})
+
+      error ->
+        error
+    end
+  rescue
+    Ecto.NoResultsError -> {:error, :not_found}
+  end
+
+  def send_reminder(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+    invoice = Invoices.get_invoice!(user.id, id)
+
+    case Reminders.send_manual_reminder(invoice) do
+      {:ok, _reminder} ->
+        json(conn, %{data: %{message: "리마인더가 발송 예약되었습니다"}})
+
+      {:error, :invalid_status} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "이 상태에서는 리마인더를 보낼 수 없습니다"})
+
+      {:error, :rate_limited} ->
+        conn
+        |> put_status(:too_many_requests)
+        |> json(%{error: "오늘 이미 리마인더를 보냈습니다. 내일 다시 시도하세요."})
 
       error ->
         error
