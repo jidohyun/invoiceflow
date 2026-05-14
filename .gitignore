@@ -50,3 +50,12 @@ npm-debug.log
 .env
 .env.local
 .env.production
+
+# MCP config (contains API tokens)
+.mcp.json
+
+# QA test upload artifacts
+/priv/static/uploads/test-*.png
+
+# Scratch / duplicate directory (slated for cleanup in AMI-58)
+/invoice_flow/
