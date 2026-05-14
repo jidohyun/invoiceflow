@@ -37,25 +37,25 @@ user =
 
 client_attrs = [
   %{
-    name: "Kim Minsu Design",
+    name: "김민수 디자인",
     email: "minsu@kimdesign.kr",
-    company: "김민수 디자인",
+    company: "김민수 디자인 스튜디오",
     timezone: "Asia/Seoul",
     phone: "+82-10-1234-5678"
   },
   %{
-    name: "Park Media Group",
-    email: "billing@parkmedia.com",
-    company: "Park Media Group",
-    timezone: "America/New_York",
-    phone: "+1-212-555-0100"
+    name: "박미디어 그룹",
+    email: "billing@parkmedia.kr",
+    company: "주식회사 박미디어",
+    timezone: "Asia/Seoul",
+    phone: "+82-2-555-0100"
   },
   %{
-    name: "Global Tech Solutions",
-    email: "accounts@globaltech.co.uk",
-    company: "Global Tech Solutions",
-    timezone: "Europe/London",
-    phone: "+44-20-7946-0958"
+    name: "글로벌테크",
+    email: "accounts@globaltech.kr",
+    company: "글로벌테크 주식회사",
+    timezone: "Asia/Seoul",
+    phone: "+82-31-7946-0958"
   }
 ]
 
@@ -77,152 +77,148 @@ clients =
 
 # ── Helper Functions ───────────────────────────────────────────────────
 
-defmodule DemoHelpers do
-  def dt(year, month, day, hour \\ 12, minute \\ 0) do
-    {:ok, naive} = NaiveDateTime.new(year, month, day, hour, minute, 0)
-    {:ok, dt} = DateTime.from_naive(naive, "Etc/UTC")
-    dt
-  end
-
-  def d(year, month, day) do
-    Date.new!(year, month, day)
-  end
+dt = fn year, month, day ->
+  {:ok, naive} = NaiveDateTime.new(year, month, day, 12, 0, 0)
+  {:ok, result} = DateTime.from_naive(naive, "Etc/UTC")
+  result
 end
 
-import DemoHelpers
+d = fn year, month, day ->
+  Date.new!(year, month, day)
+end
 
 # ── Invoices ───────────────────────────────────────────────────────────
 #
-# Client A (Kim Minsu Design): reliable payer - mostly paid on time
-# Client B (Park Media Group): sometimes late
-# Client C (Global Tech Solutions): often late or unpaid
+# Client A (김민수 디자인): 성실 결제자 - 대부분 기한 내 결제
+# Client B (박미디어 그룹): 종종 지연 결제
+# Client C (글로벌테크): 자주 연체 또는 미납
 
 now = DateTime.truncate(DateTime.utc_now(), :second)
 
 invoice_specs = [
-  # ── Client A: paid invoices (on time) ──
+  # ── Client A: 기한 내 결제 완료 ──
   %{
-    client_id: client_a.id, amount: Decimal.new("1200"), currency: "KRW",
+    client_id: client_a.id, amount: Decimal.new("1_200_000"), currency: "KRW",
     invoice_number: "INV-202601-A001", status: "paid",
-    due_date: d(2026, 1, 20), sent_at: dt(2026, 1, 5), paid_at: dt(2026, 1, 18),
-    paid_amount: Decimal.new("1200")
+    due_date: d.(2026, 1, 20), sent_at: dt.(2026, 1, 5), paid_at: dt.(2026, 1, 18),
+    paid_amount: Decimal.new("1_200_000")
   },
   %{
-    client_id: client_a.id, amount: Decimal.new("2500"), currency: "USD",
+    client_id: client_a.id, amount: Decimal.new("2_500_000"), currency: "KRW",
     invoice_number: "INV-202601-A002", status: "paid",
-    due_date: d(2026, 1, 31), sent_at: dt(2026, 1, 15), paid_at: dt(2026, 1, 29),
-    paid_amount: Decimal.new("2500")
+    due_date: d.(2026, 1, 31), sent_at: dt.(2026, 1, 15), paid_at: dt.(2026, 1, 29),
+    paid_amount: Decimal.new("2_500_000")
   },
   %{
-    client_id: client_a.id, amount: Decimal.new("800"), currency: "USD",
+    client_id: client_a.id, amount: Decimal.new("800_000"), currency: "KRW",
     invoice_number: "INV-202602-A003", status: "paid",
-    due_date: d(2026, 2, 15), sent_at: dt(2026, 2, 1), paid_at: dt(2026, 2, 13),
-    paid_amount: Decimal.new("800")
+    due_date: d.(2026, 2, 15), sent_at: dt.(2026, 2, 1), paid_at: dt.(2026, 2, 13),
+    paid_amount: Decimal.new("800_000")
   },
   %{
-    client_id: client_a.id, amount: Decimal.new("3000"), currency: "KRW",
+    client_id: client_a.id, amount: Decimal.new("3_000_000"), currency: "KRW",
     invoice_number: "INV-202602-A004", status: "paid",
-    due_date: d(2026, 2, 28), sent_at: dt(2026, 2, 10), paid_at: dt(2026, 2, 26),
-    paid_amount: Decimal.new("3000")
+    due_date: d.(2026, 2, 28), sent_at: dt.(2026, 2, 10), paid_at: dt.(2026, 2, 26),
+    paid_amount: Decimal.new("3_000_000")
   },
   %{
-    client_id: client_a.id, amount: Decimal.new("1500"), currency: "USD",
+    client_id: client_a.id, amount: Decimal.new("1_500_000"), currency: "KRW",
     invoice_number: "INV-202603-A005", status: "sent",
-    due_date: d(2026, 4, 10), sent_at: dt(2026, 3, 25),
+    due_date: d.(2026, 4, 10), sent_at: dt.(2026, 3, 25),
     paid_at: nil, paid_amount: Decimal.new("0")
   },
 
-  # ── Client B: mixed - some paid late, some partially paid ──
+  # ── Client B: 지연 결제 혼재 ──
   %{
-    client_id: client_b.id, amount: Decimal.new("4000"), currency: "USD",
+    client_id: client_b.id, amount: Decimal.new("4_000_000"), currency: "KRW",
     invoice_number: "INV-202601-B001", status: "paid",
-    due_date: d(2026, 1, 15), sent_at: dt(2026, 1, 2), paid_at: dt(2026, 1, 25),
-    paid_amount: Decimal.new("4000")
+    due_date: d.(2026, 1, 15), sent_at: dt.(2026, 1, 2), paid_at: dt.(2026, 1, 25),
+    paid_amount: Decimal.new("4_000_000")
   },
   %{
-    client_id: client_b.id, amount: Decimal.new("1800"), currency: "USD",
+    client_id: client_b.id, amount: Decimal.new("1_800_000"), currency: "KRW",
     invoice_number: "INV-202601-B002", status: "paid",
-    due_date: d(2026, 1, 31), sent_at: dt(2026, 1, 10), paid_at: dt(2026, 2, 7),
-    paid_amount: Decimal.new("1800")
+    due_date: d.(2026, 1, 31), sent_at: dt.(2026, 1, 10), paid_at: dt.(2026, 2, 7),
+    paid_amount: Decimal.new("1_800_000")
   },
   %{
-    client_id: client_b.id, amount: Decimal.new("2200"), currency: "USD",
+    client_id: client_b.id, amount: Decimal.new("2_200_000"), currency: "KRW",
     invoice_number: "INV-202602-B003", status: "paid",
-    due_date: d(2026, 2, 20), sent_at: dt(2026, 2, 5), paid_at: dt(2026, 2, 27),
-    paid_amount: Decimal.new("2200")
+    due_date: d.(2026, 2, 20), sent_at: dt.(2026, 2, 5), paid_at: dt.(2026, 2, 27),
+    paid_amount: Decimal.new("2_200_000")
   },
   %{
-    client_id: client_b.id, amount: Decimal.new("3500"), currency: "USD",
+    client_id: client_b.id, amount: Decimal.new("3_500_000"), currency: "KRW",
     invoice_number: "INV-202603-B004", status: "partially_paid",
-    due_date: d(2026, 3, 15), sent_at: dt(2026, 3, 1),
-    paid_at: nil, paid_amount: Decimal.new("1500")
+    due_date: d.(2026, 3, 15), sent_at: dt.(2026, 3, 1),
+    paid_at: nil, paid_amount: Decimal.new("1_500_000")
   },
   %{
-    client_id: client_b.id, amount: Decimal.new("5000"), currency: "USD",
+    client_id: client_b.id, amount: Decimal.new("5_000_000"), currency: "KRW",
     invoice_number: "INV-202603-B005", status: "sent",
-    due_date: d(2026, 4, 5), sent_at: dt(2026, 3, 20),
+    due_date: d.(2026, 4, 5), sent_at: dt.(2026, 3, 20),
     paid_at: nil, paid_amount: Decimal.new("0")
   },
   %{
-    client_id: client_b.id, amount: Decimal.new("950"), currency: "USD",
+    client_id: client_b.id, amount: Decimal.new("950_000"), currency: "KRW",
     invoice_number: "INV-202603-B006", status: "draft",
-    due_date: d(2026, 4, 30), sent_at: nil,
+    due_date: d.(2026, 4, 30), sent_at: nil,
     paid_at: nil, paid_amount: Decimal.new("0")
   },
 
-  # ── Client C: often late or unpaid ──
+  # ── Client C: 자주 연체 ──
   %{
-    client_id: client_c.id, amount: Decimal.new("3200"), currency: "GBP",
+    client_id: client_c.id, amount: Decimal.new("3_200_000"), currency: "KRW",
     invoice_number: "INV-202601-C001", status: "paid",
-    due_date: d(2026, 1, 10), sent_at: dt(2026, 1, 1), paid_at: dt(2026, 2, 2),
-    paid_amount: Decimal.new("3200")
+    due_date: d.(2026, 1, 10), sent_at: dt.(2026, 1, 1), paid_at: dt.(2026, 2, 2),
+    paid_amount: Decimal.new("3_200_000")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("1500"), currency: "GBP",
+    client_id: client_c.id, amount: Decimal.new("1_500_000"), currency: "KRW",
     invoice_number: "INV-202601-C002", status: "paid",
-    due_date: d(2026, 1, 25), sent_at: dt(2026, 1, 8), paid_at: dt(2026, 2, 15),
-    paid_amount: Decimal.new("1500")
+    due_date: d.(2026, 1, 25), sent_at: dt.(2026, 1, 8), paid_at: dt.(2026, 2, 15),
+    paid_amount: Decimal.new("1_500_000")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("4500"), currency: "USD",
+    client_id: client_c.id, amount: Decimal.new("4_500_000"), currency: "KRW",
     invoice_number: "INV-202602-C003", status: "paid",
-    due_date: d(2026, 2, 10), sent_at: dt(2026, 1, 25), paid_at: dt(2026, 3, 5),
-    paid_amount: Decimal.new("4500")
+    due_date: d.(2026, 2, 10), sent_at: dt.(2026, 1, 25), paid_at: dt.(2026, 3, 5),
+    paid_amount: Decimal.new("4_500_000")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("2800"), currency: "GBP",
+    client_id: client_c.id, amount: Decimal.new("2_800_000"), currency: "KRW",
     invoice_number: "INV-202602-C004", status: "overdue",
-    due_date: d(2026, 2, 28), sent_at: dt(2026, 2, 10),
+    due_date: d.(2026, 2, 28), sent_at: dt.(2026, 2, 10),
     paid_at: nil, paid_amount: Decimal.new("0")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("1900"), currency: "USD",
+    client_id: client_c.id, amount: Decimal.new("1_900_000"), currency: "KRW",
     invoice_number: "INV-202603-C005", status: "overdue",
-    due_date: d(2026, 3, 10), sent_at: dt(2026, 2, 25),
+    due_date: d.(2026, 3, 10), sent_at: dt.(2026, 2, 25),
     paid_at: nil, paid_amount: Decimal.new("0")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("3700"), currency: "GBP",
+    client_id: client_c.id, amount: Decimal.new("3_700_000"), currency: "KRW",
     invoice_number: "INV-202603-C006", status: "overdue",
-    due_date: d(2026, 3, 20), sent_at: dt(2026, 3, 5),
+    due_date: d.(2026, 3, 20), sent_at: dt.(2026, 3, 5),
     paid_at: nil, paid_amount: Decimal.new("0")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("2100"), currency: "USD",
+    client_id: client_c.id, amount: Decimal.new("2_100_000"), currency: "KRW",
     invoice_number: "INV-202603-C007", status: "partially_paid",
-    due_date: d(2026, 3, 25), sent_at: dt(2026, 3, 10),
-    paid_at: nil, paid_amount: Decimal.new("700")
+    due_date: d.(2026, 3, 25), sent_at: dt.(2026, 3, 10),
+    paid_at: nil, paid_amount: Decimal.new("700_000")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("600"), currency: "GBP",
+    client_id: client_c.id, amount: Decimal.new("600_000"), currency: "KRW",
     invoice_number: "INV-202603-C008", status: "sent",
-    due_date: d(2026, 4, 15), sent_at: dt(2026, 3, 28),
+    due_date: d.(2026, 4, 15), sent_at: dt.(2026, 3, 28),
     paid_at: nil, paid_amount: Decimal.new("0")
   },
   %{
-    client_id: client_c.id, amount: Decimal.new("1100"), currency: "USD",
+    client_id: client_c.id, amount: Decimal.new("1_100_000"), currency: "KRW",
     invoice_number: "INV-202603-C009", status: "draft",
-    due_date: d(2026, 4, 30), sent_at: nil,
+    due_date: d.(2026, 4, 30), sent_at: nil,
     paid_at: nil, paid_amount: Decimal.new("0")
   },
 ]
