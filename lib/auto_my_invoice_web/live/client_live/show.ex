@@ -22,11 +22,11 @@ defmodule AutoMyInvoiceWeb.ClientLive.Show do
       {:ok, _} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Client deleted")
+         |> put_flash(:info, "거래처가 삭제되었습니다")
          |> push_navigate(to: ~p"/clients")}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Could not delete client")}
+        {:noreply, put_flash(socket, :error, "거래처를 삭제할 수 없습니다")}
     end
   end
 
@@ -36,14 +36,14 @@ defmodule AutoMyInvoiceWeb.ClientLive.Show do
     <.page_header title={@client.name} subtitle={@client.company}>
       <:actions>
         <.link navigate={~p"/clients/#{@client.id}/edit"} class="btn btn-ghost btn-sm">
-          <.icon name="hero-pencil" class="size-4" /> Edit
+          <.icon name="hero-pencil" class="size-4" /> 수정
         </.link>
         <button
           class="btn btn-error btn-sm"
           phx-click="delete"
-          data-confirm="Are you sure you want to delete this client?"
+          data-confirm="이 거래처를 정말 삭제하시겠습니까?"
         >
-          <.icon name="hero-trash" class="size-4" /> Delete
+          <.icon name="hero-trash" class="size-4" /> 삭제
         </button>
       </:actions>
     </.page_header>
@@ -51,27 +51,27 @@ defmodule AutoMyInvoiceWeb.ClientLive.Show do
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
       <div class="card bg-base-100 shadow lg:col-span-2">
         <div class="card-body">
-          <h2 class="card-title text-lg">Contact Information</h2>
+          <h2 class="card-title text-lg">연락처 정보</h2>
           <div class="grid grid-cols-2 gap-4 mt-2">
             <div>
-              <span class="text-sm text-base-content/60">Email</span>
+              <span class="text-sm text-base-content/60">이메일</span>
               <p>{@client.email}</p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Phone</span>
+              <span class="text-sm text-base-content/60">전화번호</span>
               <p>{@client.phone || "-"}</p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Address</span>
+              <span class="text-sm text-base-content/60">주소</span>
               <p>{@client.address || "-"}</p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Timezone</span>
+              <span class="text-sm text-base-content/60">시간대</span>
               <p>{@client.timezone}</p>
             </div>
           </div>
           <div :if={@client.notes} class="mt-4">
-            <span class="text-sm text-base-content/60">Notes</span>
+            <span class="text-sm text-base-content/60">메모</span>
             <p class="whitespace-pre-wrap">{@client.notes}</p>
           </div>
         </div>
@@ -79,22 +79,22 @@ defmodule AutoMyInvoiceWeb.ClientLive.Show do
 
       <div class="card bg-base-100 shadow">
         <div class="card-body">
-          <h2 class="card-title text-lg">Payment Stats</h2>
+          <h2 class="card-title text-lg">결제 통계</h2>
           <div class="space-y-3 mt-2">
             <div>
-              <span class="text-sm text-base-content/60">Total Invoiced</span>
+              <span class="text-sm text-base-content/60">총 청구액</span>
               <p class="text-xl font-bold">
-                <.money amount={@client.total_invoiced} currency="USD" />
+                <.money amount={@client.total_invoiced} currency="KRW" />
               </p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Total Paid</span>
+              <span class="text-sm text-base-content/60">총 수금액</span>
               <p class="text-xl font-bold text-success">
-                <.money amount={@client.total_paid} currency="USD" />
+                <.money amount={@client.total_paid} currency="KRW" />
               </p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Avg Payment Days</span>
+              <span class="text-sm text-base-content/60">평균 결제 소요일</span>
               <p class="text-xl font-bold">{@client.avg_payment_days || "-"}</p>
             </div>
           </div>
@@ -105,16 +105,16 @@ defmodule AutoMyInvoiceWeb.ClientLive.Show do
     <div class="card bg-base-100 shadow">
       <div class="card-body">
         <div class="flex justify-between items-center">
-          <h2 class="card-title text-lg">Invoices</h2>
+          <h2 class="card-title text-lg">송장</h2>
           <.link navigate={~p"/invoices/new"} class="btn btn-primary btn-sm">
-            <.icon name="hero-plus" class="size-4" /> New Invoice
+            <.icon name="hero-plus" class="size-4" /> 새 송장
           </.link>
         </div>
 
         <%= if @invoices == [] do %>
           <.empty_state
-            title="No invoices"
-            description="No invoices for this client yet."
+            title="송장 없음"
+            description="이 거래처에 발행된 송장이 아직 없습니다."
             icon="hero-document-text"
           />
         <% else %>
@@ -122,10 +122,10 @@ defmodule AutoMyInvoiceWeb.ClientLive.Show do
             <table class="table">
               <thead>
                 <tr>
-                  <th>Invoice #</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Due Date</th>
+                  <th>송장 번호</th>
+                  <th>금액</th>
+                  <th>상태</th>
+                  <th>지급 기한</th>
                 </tr>
               </thead>
               <tbody>

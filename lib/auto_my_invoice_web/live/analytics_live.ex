@@ -9,7 +9,7 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
 
     {:ok,
      socket
-     |> assign(:page_title, "Analytics")
+     |> assign(:page_title, "분석")
      |> load_analytics(user)}
   end
 
@@ -35,18 +35,18 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
     ~H"""
     <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div>
-        <h2 class="text-3xl font-semibold font-display">Analytics</h2>
-        <p class="text-base-content/60 text-sm mt-1">Collection trends, aging, and cashflow forecast</p>
+        <h2 class="text-3xl font-semibold font-display">분석</h2>
+        <p class="text-base-content/60 text-sm mt-1">수금 추이, 연체 분포, 캐시플로우 예측</p>
       </div>
       <.link navigate={~p"/"} class="btn btn-ghost btn-sm gap-1">
-        <.icon name="hero-arrow-left" class="size-4" /> Back to Dashboard
+        <.icon name="hero-arrow-left" class="size-4" /> 대시보드로
       </.link>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <%!-- Monthly Collection Trends --%>
       <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
-        <h3 class="text-lg font-semibold mb-4">Monthly Collection Trends</h3>
+        <h3 class="text-lg font-semibold mb-4">월별 수금 추이</h3>
         <%= if has_chart_data?(@monthly_collections) do %>
           <div
             id="monthly-chart"
@@ -60,13 +60,13 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
             <canvas></canvas>
           </div>
         <% else %>
-          <.empty_chart_state message="No invoice data yet. Create invoices to see collection trends." />
+          <.empty_chart_state message="아직 송장 데이터가 없습니다. 송장을 생성하면 수금 추이를 볼 수 있습니다." />
         <% end %>
       </div>
 
       <%!-- Invoice Status Distribution --%>
       <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
-        <h3 class="text-lg font-semibold mb-4">Invoice Status Distribution</h3>
+        <h3 class="text-lg font-semibold mb-4">송장 상태 분포</h3>
         <%= if has_chart_data?(@status_distribution) do %>
           <div
             id="status-chart"
@@ -80,13 +80,13 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
             <canvas></canvas>
           </div>
         <% else %>
-          <.empty_chart_state message="No invoices yet. Create invoices to see status distribution." />
+          <.empty_chart_state message="송장이 없습니다. 송장을 생성하면 상태 분포를 볼 수 있습니다." />
         <% end %>
       </div>
 
       <%!-- Invoice Aging --%>
       <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
-        <h3 class="text-lg font-semibold mb-4">Invoice Aging</h3>
+        <h3 class="text-lg font-semibold mb-4">연체 경과일 분포</h3>
         <%= if has_aging_data?(@invoice_aging) do %>
           <div
             id="aging-chart"
@@ -100,13 +100,13 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
             <canvas></canvas>
           </div>
         <% else %>
-          <.empty_chart_state message="No outstanding invoices. All caught up!" />
+          <.empty_chart_state message="미수금 송장이 없습니다. 모두 정리되었습니다!" />
         <% end %>
       </div>
 
       <%!-- Cashflow Forecast --%>
       <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
-        <h3 class="text-lg font-semibold mb-4">Cashflow Forecast (90 days)</h3>
+        <h3 class="text-lg font-semibold mb-4">캐시플로우 예측 (90일)</h3>
         <%= if has_chart_data?(@cashflow_forecast) do %>
           <div
             id="forecast-chart"
@@ -120,7 +120,7 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
             <canvas></canvas>
           </div>
         <% else %>
-          <.empty_chart_state message="No unpaid invoices to forecast. Great job!" />
+          <.empty_chart_state message="예측할 미결제 송장이 없습니다. 좋습니다!" />
         <% end %>
       </div>
     </div>
@@ -143,14 +143,14 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
       labels: Enum.map(monthly, & &1.month),
       datasets: [
         %{
-          label: "Invoiced",
+          label: "청구",
           data: Enum.map(monthly, &Decimal.to_float(&1.invoiced)),
           backgroundColor: "rgba(99, 102, 241, 0.5)",
           borderColor: "rgb(99, 102, 241)",
           borderWidth: 1
         },
         %{
-          label: "Collected",
+          label: "수금",
           data: Enum.map(monthly, &Decimal.to_float(&1.collected)),
           backgroundColor: "rgba(34, 197, 94, 0.5)",
           borderColor: "rgb(34, 197, 94)",
@@ -191,10 +191,10 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
     ]
 
     %{
-      labels: Enum.map(buckets, &"#{&1} days"),
+      labels: Enum.map(buckets, &"#{&1}일"),
       datasets: [
         %{
-          label: "Outstanding Amount",
+          label: "미수금",
           data: Enum.map(buckets, fn bucket ->
             aging |> Map.get(bucket, %{total: Decimal.new(0)}) |> Map.get(:total) |> Decimal.to_float()
           end),
@@ -210,7 +210,7 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
       labels: Enum.map(forecast, &Date.to_string(&1.date)),
       datasets: [
         %{
-          label: "Expected Payment",
+          label: "예상 입금액",
           data: Enum.map(forecast, &Decimal.to_float(&1.expected_amount)),
           fill: true,
           backgroundColor: "rgba(99, 102, 241, 0.1)",
@@ -228,7 +228,7 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
   defp monthly_chart_options do
     %{
       scales: %{
-        y: %{beginAtZero: true, ticks: %{callback_prefix: "$"}},
+        y: %{beginAtZero: true, ticks: %{callback_prefix: "₩"}},
         x: %{grid: %{display: false}}
       },
       plugins: %{legend: %{position: "top"}}
@@ -268,7 +268,11 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
 
   defp has_aging_data?(_), do: false
 
-  defp format_status(status) do
-    status |> String.replace("_", " ") |> String.capitalize()
-  end
+  defp format_status("paid"), do: "결제완료"
+  defp format_status("sent"), do: "발송"
+  defp format_status("overdue"), do: "연체"
+  defp format_status("partially_paid"), do: "부분결제"
+  defp format_status("draft"), do: "임시저장"
+  defp format_status("cancelled"), do: "취소"
+  defp format_status(status), do: status
 end

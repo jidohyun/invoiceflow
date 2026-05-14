@@ -8,7 +8,7 @@ defmodule AutoMyInvoiceWeb.UploadLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Upload Invoice")
+     |> assign(:page_title, "송장 업로드")
      |> assign(:extraction_job, nil)
      |> allow_upload(:invoice_file,
        accept: ~w(.pdf .jpg .jpeg .png),
@@ -68,10 +68,10 @@ defmodule AutoMyInvoiceWeb.UploadLive do
         {:noreply,
          socket
          |> assign(:extraction_job, job)
-         |> put_flash(:info, "File uploaded. Processing...")}
+         |> put_flash(:info, "파일이 업로드되었습니다. 처리 중...")}
 
       {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, "Upload failed")}
+        {:noreply, put_flash(socket, :error, "업로드에 실패했습니다")}
     end
   end
 
@@ -82,21 +82,21 @@ defmodule AutoMyInvoiceWeb.UploadLive do
     {:noreply,
      socket
      |> assign(:extraction_job, job)
-     |> put_flash(:info, "Extraction complete!")}
+     |> put_flash(:info, "추출이 완료되었습니다!")}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header title="Upload Invoice" />
+    <.page_header title="송장 업로드" />
 
     <div class="max-w-2xl">
       <%= if @extraction_job == nil do %>
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title text-lg">Upload a Document</h2>
+            <h2 class="card-title text-lg">문서 업로드</h2>
             <p class="text-base-content/60 mb-4">
-              Upload a PDF or image of an invoice. AI will extract the details automatically.
+              송장 PDF나 이미지를 업로드하면 AI가 자동으로 내용을 추출합니다.
             </p>
 
             <form id="upload-form" phx-submit="upload" phx-change="validate">
@@ -114,7 +114,7 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                     class="btn btn-ghost btn-xs btn-circle"
                     phx-click="cancel-upload"
                     phx-value-ref={entry.ref}
-                    aria-label="cancel"
+                    aria-label="취소"
                   >
                     <.icon name="hero-x-mark" class="size-4" />
                   </button>
@@ -134,7 +134,7 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                 class="btn btn-primary mt-4"
                 disabled={@uploads.invoice_file.entries == []}
               >
-                <.icon name="hero-arrow-up-tray" class="size-4" /> Upload & Extract
+                <.icon name="hero-arrow-up-tray" class="size-4" /> 업로드 & 추출
               </button>
             </form>
           </div>
@@ -142,31 +142,31 @@ defmodule AutoMyInvoiceWeb.UploadLive do
       <% else %>
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title text-lg">Extraction Status</h2>
+            <h2 class="card-title text-lg">추출 상태</h2>
 
             <div class="mt-4">
               <%= case @extraction_job.status do %>
                 <% s when s in ~w(pending processing) -> %>
                   <div class="flex items-center gap-3">
                     <span class="loading loading-spinner loading-md text-primary"></span>
-                    <span class="text-base-content/60">Processing document...</span>
+                    <span class="text-base-content/60">문서 처리 중...</span>
                   </div>
 
                 <% "completed" -> %>
                   <div class="alert alert-success mb-4">
                     <.icon name="hero-check-circle" class="size-5" />
-                    <span>Extraction complete! Review the results below.</span>
+                    <span>추출이 완료되었습니다! 아래 결과를 확인하세요.</span>
                   </div>
 
                   <div :if={@extraction_job.extracted_data} class="space-y-3">
                     <div :for={{key, value} <- @extraction_job.extracted_data} class="flex justify-between border-b border-base-200 pb-2">
-                      <span class="text-sm text-base-content/60 capitalize">{humanize_key(key)}</span>
+                      <span class="text-sm text-base-content/60">{humanize_key(key)}</span>
                       <span class="font-medium">{format_value(value)}</span>
                     </div>
                   </div>
 
                   <div :if={@extraction_job.confidence_score} class="mt-3">
-                    <span class="text-sm text-base-content/60">Confidence</span>
+                    <span class="text-sm text-base-content/60">신뢰도</span>
                     <progress
                       class={"progress #{confidence_class(@extraction_job.confidence_score)} w-full"}
                       value={round(@extraction_job.confidence_score * 100)}
@@ -180,20 +180,20 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                       navigate={~p"/invoices/new?extraction_job_id=#{@extraction_job.id}"}
                       class="btn btn-primary"
                     >
-                      <.icon name="hero-document-plus" class="size-4" /> Create Invoice
+                      <.icon name="hero-document-plus" class="size-4" /> 송장 생성
                     </.link>
                     <button class="btn btn-ghost" phx-click="reset" phx-target="">
-                      Upload Another
+                      다른 파일 업로드
                     </button>
                   </div>
 
                 <% "failed" -> %>
                   <div class="alert alert-error">
                     <.icon name="hero-x-circle" class="size-5" />
-                    <span>Extraction failed: {@extraction_job.error_message || "Unknown error"}</span>
+                    <span>추출 실패: {@extraction_job.error_message || "알 수 없는 오류"}</span>
                   </div>
                   <button class="btn btn-ghost mt-4" phx-click="reset">
-                    Try Again
+                    다시 시도
                   </button>
               <% end %>
             </div>
@@ -204,14 +204,20 @@ defmodule AutoMyInvoiceWeb.UploadLive do
     """
   end
 
-  defp error_to_string(:too_large), do: "File is too large (max 10MB)"
-  defp error_to_string(:not_accepted), do: "Invalid file type. Use PDF, JPG, or PNG"
-  defp error_to_string(:too_many_files), do: "Only one file at a time"
-  defp error_to_string(err), do: "Error: #{inspect(err)}"
+  defp error_to_string(:too_large), do: "파일이 너무 큽니다 (최대 10MB)"
+  defp error_to_string(:not_accepted), do: "지원되지 않는 파일 형식입니다. PDF, JPG, PNG만 가능"
+  defp error_to_string(:too_many_files), do: "한 번에 하나의 파일만 업로드할 수 있습니다"
+  defp error_to_string(err), do: "오류: #{inspect(err)}"
 
-  defp humanize_key(key) when is_binary(key) do
-    key |> String.replace("_", " ")
-  end
+  defp humanize_key("amount"), do: "금액"
+  defp humanize_key("currency"), do: "통화"
+  defp humanize_key("due_date"), do: "지급 기한"
+  defp humanize_key("notes"), do: "메모"
+  defp humanize_key("invoice_number"), do: "송장 번호"
+  defp humanize_key("items"), do: "품목"
+  defp humanize_key("client_name"), do: "거래처명"
+  defp humanize_key("client_email"), do: "거래처 이메일"
+  defp humanize_key(key) when is_binary(key), do: String.replace(key, "_", " ")
 
   defp format_value(value) when is_list(value), do: Enum.join(value, ", ")
   defp format_value(value) when is_map(value), do: Jason.encode!(value)

@@ -25,9 +25,9 @@ defmodule AutoMyInvoiceWeb.BillingLiveTest do
     test "renders billing page with current plan", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/settings/billing")
 
-      assert html =~ "Billing"
-      assert html =~ "Current Plan"
-      assert html =~ "Free"
+      assert html =~ "결제"
+      assert html =~ "현재 플랜"
+      assert html =~ "무료"
     end
 
     test "shows all plan options", %{conn: conn} do
@@ -42,7 +42,7 @@ defmodule AutoMyInvoiceWeb.BillingLiveTest do
     test "shows usage progress for free plan", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/settings/billing")
 
-      assert html =~ "Invoices this month"
+      assert html =~ "이번 달 송장"
       assert html =~ "0 / 3"
     end
 
@@ -54,7 +54,7 @@ defmodule AutoMyInvoiceWeb.BillingLiveTest do
         |> element("button[phx-click=upgrade][phx-value-plan=starter]")
         |> render_click()
 
-      assert html =~ "Paddle Checkout"
+      assert html =~ "Paddle 결제창"
     end
   end
 end

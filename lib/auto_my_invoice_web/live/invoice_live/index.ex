@@ -4,11 +4,11 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Index do
   alias AutoMyInvoice.{Invoices, PubSubTopics}
 
   @statuses [
-    {"All", nil},
-    {"Draft", "draft"},
-    {"Sent", "sent"},
-    {"Overdue", "overdue"},
-    {"Paid", "paid"}
+    {"전체", nil},
+    {"임시저장", "draft"},
+    {"발송", "sent"},
+    {"연체", "overdue"},
+    {"결제완료", "paid"}
   ]
 
   @impl true
@@ -21,7 +21,7 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Index do
 
     {:ok,
      socket
-     |> assign(:page_title, "Invoices")
+     |> assign(:page_title, "송장")
      |> assign(:statuses, @statuses)
      |> assign(:sort_by, :due_date)
      |> assign(:sort_order, :desc)
@@ -124,18 +124,24 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Index do
   defp tab_count(counts, nil), do: Map.get(counts, "all", 0)
   defp tab_count(counts, status), do: Map.get(counts, status, 0)
 
-  defp empty_state_description(nil, ""), do: "Create your first invoice to get started."
-  defp empty_state_description(nil, _q), do: "No invoices match your search."
-  defp empty_state_description(status, ""), do: "No #{status} invoices found."
-  defp empty_state_description(status, _q), do: "No #{status} invoices match your search."
+  defp empty_state_description(nil, ""), do: "첫 송장을 발행해 시작해 보세요."
+  defp empty_state_description(nil, _q), do: "검색 조건에 맞는 송장이 없습니다."
+  defp empty_state_description(status, ""), do: "#{status_label(status)} 송장이 없습니다."
+  defp empty_state_description(status, _q), do: "검색 조건에 맞는 #{status_label(status)} 송장이 없습니다."
+
+  defp status_label("draft"), do: "임시저장"
+  defp status_label("sent"), do: "발송"
+  defp status_label("overdue"), do: "연체"
+  defp status_label("paid"), do: "결제완료"
+  defp status_label(other), do: other
 
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header title="Invoices">
+    <.page_header title="송장">
       <:actions>
         <.link navigate={~p"/invoices/new"} class="btn btn-primary btn-sm">
-          <.icon name="hero-plus" class="size-4" /> New Invoice
+          <.icon name="hero-plus" class="size-4" /> 새 송장
         </.link>
       </:actions>
     </.page_header>
@@ -158,7 +164,7 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Index do
           type="text"
           name="q"
           value={@search}
-          placeholder="Search by invoice #, client, or notes..."
+          placeholder="송장 번호, 거래처, 메모로 검색..."
           class="input input-bordered input-sm w-full max-w-xs"
           phx-debounce="300"
         />
@@ -167,13 +173,13 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Index do
 
     <%= if @invoices == [] do %>
       <.empty_state
-        title="No invoices found"
+        title="송장이 없습니다"
         description={empty_state_description(@current_status, @search)}
         icon="hero-document-text"
       >
         <:action>
           <.link navigate={~p"/invoices/new"} class="btn btn-primary btn-sm">
-            Create Invoice
+            송장 만들기
           </.link>
         </:action>
       </.empty_state>
@@ -182,17 +188,17 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Index do
         <table class="table">
           <thead>
             <tr>
-              <th>Invoice #</th>
-              <th>Client</th>
+              <th>송장 번호</th>
+              <th>거래처</th>
               <th class="cursor-pointer" phx-click="sort" phx-value-field="amount">
-                Amount{sort_indicator(assigns, :amount)}
+                금액{sort_indicator(assigns, :amount)}
               </th>
-              <th>Status</th>
+              <th>상태</th>
               <th class="cursor-pointer" phx-click="sort" phx-value-field="due_date">
-                Due Date{sort_indicator(assigns, :due_date)}
+                지급 기한{sort_indicator(assigns, :due_date)}
               </th>
               <th class="cursor-pointer" phx-click="sort" phx-value-field="inserted_at">
-                Created{sort_indicator(assigns, :inserted_at)}
+                작성일{sort_indicator(assigns, :inserted_at)}
               </th>
             </tr>
           </thead>

@@ -517,11 +517,9 @@ defmodule AutoMyInvoiceWeb.CoreComponents do
     # dynamically, so we need to translate them by calling Gettext
     # with our gettext backend as first argument. Translations are
     # available in the errors.po file (as we use the "errors" domain).
-    if count = opts[:count] do
-      Gettext.dngettext(AutoMyInvoiceWeb.Gettext, "errors", msg, msg, count, opts)
-    else
-      Gettext.dgettext(AutoMyInvoiceWeb.Gettext, "errors", msg, opts)
-    end
+    Enum.reduce(opts, msg, fn {key, value}, acc ->
+      String.replace(acc, "%{#{key}}", fn _ -> to_string(value) end)
+    end)
   end
 
   @doc """

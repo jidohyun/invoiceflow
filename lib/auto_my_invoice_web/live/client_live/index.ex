@@ -10,7 +10,7 @@ defmodule AutoMyInvoiceWeb.ClientLive.Index do
 
     {:ok,
      socket
-     |> assign(:page_title, "Clients")
+     |> assign(:page_title, "거래처")
      |> assign(:clients, clients)
      |> assign(:search, "")}
   end
@@ -25,10 +25,10 @@ defmodule AutoMyInvoiceWeb.ClientLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header title="Clients" subtitle={"#{length(@clients)} clients"}>
+    <.page_header title="거래처" subtitle={"거래처 #{length(@clients)}곳"}>
       <:actions>
         <.link navigate={~p"/clients/new"} class="btn btn-primary btn-sm">
-          <.icon name="hero-plus" class="size-4" /> New Client
+          <.icon name="hero-plus" class="size-4" /> 새 거래처
         </.link>
       </:actions>
     </.page_header>
@@ -39,7 +39,7 @@ defmodule AutoMyInvoiceWeb.ClientLive.Index do
           type="text"
           name="search"
           value={@search}
-          placeholder="Search clients..."
+          placeholder="거래처 검색..."
           class="input input-bordered w-full max-w-xs"
           phx-debounce="300"
         />
@@ -48,12 +48,12 @@ defmodule AutoMyInvoiceWeb.ClientLive.Index do
 
     <%= if @clients == [] do %>
       <.empty_state
-        title="No clients yet"
-        description="Add your first client to start sending invoices."
+        title="등록된 거래처가 없습니다"
+        description="첫 거래처를 등록하고 송장을 발행해 보세요."
         icon="hero-users"
       >
         <:action>
-          <.link navigate={~p"/clients/new"} class="btn btn-primary btn-sm">Add Client</.link>
+          <.link navigate={~p"/clients/new"} class="btn btn-primary btn-sm">거래처 추가</.link>
         </:action>
       </.empty_state>
     <% else %>
@@ -61,10 +61,10 @@ defmodule AutoMyInvoiceWeb.ClientLive.Index do
         <table class="table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Company</th>
-              <th>Total Invoiced</th>
+              <th>이름</th>
+              <th>이메일</th>
+              <th>회사</th>
+              <th>총 청구액</th>
               <th></th>
             </tr>
           </thead>
@@ -77,10 +77,10 @@ defmodule AutoMyInvoiceWeb.ClientLive.Index do
               <td class="font-medium">{client.name}</td>
               <td>{client.email}</td>
               <td>{client.company || "-"}</td>
-              <td><.money amount={client.total_invoiced} currency="USD" /></td>
+              <td><.money amount={client.total_invoiced} currency="KRW" /></td>
               <td>
                 <.link navigate={~p"/clients/#{client.id}/edit"} class="btn btn-ghost btn-xs">
-                  Edit
+                  수정
                 </.link>
               </td>
             </tr>

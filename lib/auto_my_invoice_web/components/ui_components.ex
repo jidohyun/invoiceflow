@@ -50,11 +50,13 @@ defmodule AutoMyInvoiceWeb.UiComponents do
   defp status_class("cancelled"), do: "badge-neutral"
   defp status_class(_), do: "badge-ghost"
 
-  defp format_status(status) do
-    status
-    |> String.replace("_", " ")
-    |> String.capitalize()
-  end
+  defp format_status("paid"), do: "결제완료"
+  defp format_status("sent"), do: "발송"
+  defp format_status("overdue"), do: "연체"
+  defp format_status("partially_paid"), do: "부분결제"
+  defp format_status("draft"), do: "임시저장"
+  defp format_status("cancelled"), do: "취소"
+  defp format_status(status), do: status
 
   # 3. sidebar_link - Navigation link with active state
   attr :path, :string, required: true
@@ -121,7 +123,7 @@ defmodule AutoMyInvoiceWeb.UiComponents do
 
   # 6. money - Currency formatting
   attr :amount, :any, required: true
-  attr :currency, :string, default: "USD"
+  attr :currency, :string, default: "KRW"
 
   def money(assigns) do
     ~H"""

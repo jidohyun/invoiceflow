@@ -5,11 +5,11 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
   alias AutoMyInvoice.Invoices.Invoice
 
   @currencies [
-    {"USD - US Dollar", "USD"},
-    {"EUR - Euro", "EUR"},
-    {"KRW - Korean Won", "KRW"},
-    {"GBP - British Pound", "GBP"},
-    {"JPY - Japanese Yen", "JPY"}
+    {"KRW - 대한민국 원", "KRW"},
+    {"USD - 미국 달러", "USD"},
+    {"EUR - 유로", "EUR"},
+    {"JPY - 일본 엔", "JPY"},
+    {"GBP - 영국 파운드", "GBP"}
   ]
 
   @impl true
@@ -104,11 +104,11 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
       {:ok, invoice} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Invoice created successfully")
+         |> put_flash(:info, "송장이 생성되었습니다")
          |> push_navigate(to: ~p"/invoices/#{invoice.id}")}
 
       {:error, :plan_limit} ->
-        {:noreply, put_flash(socket, :error, "You've reached your monthly invoice limit. Upgrade your plan.")}
+        {:noreply, put_flash(socket, :error, "이번 달 송장 한도에 도달했습니다. 플랜을 업그레이드하세요.")}
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -120,7 +120,7 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
       {:ok, invoice} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Invoice updated successfully")
+         |> put_flash(:info, "송장이 수정되었습니다")
          |> push_navigate(to: ~p"/invoices/#{invoice.id}")}
 
       {:error, changeset} ->
@@ -139,7 +139,7 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
       <%= if !@can_create && @action == :new do %>
         <div class="alert alert-warning mb-4">
           <.icon name="hero-exclamation-triangle" class="size-5" />
-          <span>You've reached your monthly invoice limit on the Free plan. Upgrade to create more invoices.</span>
+          <span>무료 플랜의 이번 달 송장 한도에 도달했습니다. 더 많은 송장을 생성하려면 업그레이드하세요.</span>
         </div>
       <% end %>
 
@@ -154,33 +154,33 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
           <.input
             field={@form[:client_id]}
             type="select"
-            label="Client"
-            options={[{"Select a client...", ""} | @client_options]}
+            label="거래처"
+            options={[{"거래처를 선택하세요...", ""} | @client_options]}
             required
           />
-          <.input field={@form[:currency]} type="select" label="Currency" options={@currencies} />
+          <.input field={@form[:currency]} type="select" label="통화" options={@currencies} />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <.input field={@form[:due_date]} type="date" label="Due Date" required />
-          <.input field={@form[:amount]} type="number" label="Total Amount" step="0.01" required />
+          <.input field={@form[:due_date]} type="date" label="지급 기한" required />
+          <.input field={@form[:amount]} type="number" label="총 금액" step="0.01" required />
         </div>
 
-        <.input field={@form[:notes]} type="textarea" label="Notes" />
+        <.input field={@form[:notes]} type="textarea" label="메모" />
 
-        <div class="divider">Line Items</div>
+        <div class="divider">품목</div>
 
         <div class="space-y-3">
           <.inputs_for :let={item_form} field={@form[:items]}>
             <div class="flex gap-2 items-end">
               <div class="flex-1">
-                <.input field={item_form[:description]} type="text" label="Description" placeholder="Item description" />
+                <.input field={item_form[:description]} type="text" label="품목명" placeholder="품목명을 입력하세요" />
               </div>
               <div class="w-20">
-                <.input field={item_form[:quantity]} type="number" label="Qty" step="0.01" min="0" />
+                <.input field={item_form[:quantity]} type="number" label="수량" step="0.01" min="0" />
               </div>
               <div class="w-28">
-                <.input field={item_form[:unit_price]} type="number" label="Unit Price" step="0.01" min="0" />
+                <.input field={item_form[:unit_price]} type="number" label="단가" step="0.01" min="0" />
               </div>
               <div class="w-10 pb-2">
                 <button
@@ -205,17 +205,17 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
           phx-click="add_item"
           phx-target={@myself}
         >
-          <.icon name="hero-plus" class="size-4" /> Add Item
+          <.icon name="hero-plus" class="size-4" /> 품목 추가
         </button>
 
         <:actions>
           <.button
             type="submit"
-            phx-disable-with="Saving..."
+            phx-disable-with="저장 중..."
             class="btn btn-primary"
             disabled={!@can_create && @action == :new}
           >
-            {if @action == :new, do: "Create Invoice", else: "Update Invoice"}
+            {if @action == :new, do: "송장 생성", else: "송장 수정"}
           </.button>
         </:actions>
       </.simple_form>

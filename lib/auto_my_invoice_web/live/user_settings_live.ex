@@ -8,6 +8,7 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
     "Asia/Tokyo",
     "Asia/Shanghai",
     "Asia/Singapore",
+    "UTC",
     "America/New_York",
     "America/Chicago",
     "America/Denver",
@@ -16,24 +17,23 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
     "Europe/Paris",
     "Europe/Berlin",
     "Pacific/Auckland",
-    "Australia/Sydney",
-    "UTC"
+    "Australia/Sydney"
   ]
 
   @brand_tones [
-    {"Professional", "professional"},
-    {"Friendly", "friendly"},
-    {"Formal", "formal"}
+    {"프로페셔널", "professional"},
+    {"친근함", "friendly"},
+    {"격식 있음", "formal"}
   ]
 
   def render(assigns) do
     ~H"""
     <div class="max-w-2xl mx-auto p-6">
-      <h1 class="text-3xl font-bold mb-8">Settings</h1>
+      <h1 class="text-3xl font-bold mb-8">설정</h1>
 
       <div class="card bg-base-100 shadow-xl mb-6">
         <div class="card-body">
-          <h2 class="card-title text-lg mb-4">Account</h2>
+          <h2 class="card-title text-lg mb-4">계정</h2>
 
           <div class="flex items-center gap-4 mb-4">
             <div class="avatar placeholder">
@@ -43,7 +43,7 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
             </div>
             <div>
               <p class="font-medium">{@current_user.email}</p>
-              <div class="badge badge-outline badge-sm mt-1">{String.capitalize(@current_user.plan)} plan</div>
+              <div class="badge badge-outline badge-sm mt-1">{plan_label(@current_user.plan)} 플랜</div>
             </div>
           </div>
         </div>
@@ -51,7 +51,7 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
 
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-          <h2 class="card-title text-lg mb-4">Profile</h2>
+          <h2 class="card-title text-lg mb-4">프로필</h2>
 
           <.form
             for={@form}
@@ -62,7 +62,7 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
           >
             <div class="form-control">
               <label class="label" for="profile_company_name">
-                <span class="label-text">Company name</span>
+                <span class="label-text">회사명</span>
               </label>
               <input
                 type="text"
@@ -70,13 +70,13 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
                 id="profile_company_name"
                 value={@form[:company_name].value}
                 class="input input-bordered w-full"
-                placeholder="Your company"
+                placeholder="회사명을 입력하세요"
               />
             </div>
 
             <div class="form-control">
               <label class="label" for="profile_timezone">
-                <span class="label-text">Timezone</span>
+                <span class="label-text">시간대</span>
               </label>
               <select
                 name="profile[timezone]"
@@ -95,7 +95,7 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
 
             <div class="form-control">
               <label class="label" for="profile_brand_tone">
-                <span class="label-text">Brand tone</span>
+                <span class="label-text">브랜드 톤</span>
               </label>
               <select
                 name="profile[brand_tone]"
@@ -112,14 +112,14 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
               </select>
               <label class="label">
                 <span class="label-text-alt text-base-content/50">
-                  Affects AI-generated invoice reminder tone
+                  AI가 생성하는 리마인더 이메일 톤에 반영됩니다
                 </span>
               </label>
             </div>
 
             <div class="form-control mt-6">
-              <button type="submit" phx-disable-with="Saving..." class="btn btn-primary">
-                Save changes
+              <button type="submit" phx-disable-with="저장 중..." class="btn btn-primary">
+                변경사항 저장
               </button>
             </div>
           </.form>
@@ -159,7 +159,7 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
          socket
          |> assign(current_user: user)
          |> assign_form(changeset)
-         |> put_flash(:info, "Settings updated successfully.")}
+         |> put_flash(:info, "설정이 저장되었습니다.")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -169,4 +169,9 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, form: to_form(changeset, as: "profile"))
   end
+
+  defp plan_label("free"), do: "무료"
+  defp plan_label("starter"), do: "스타터"
+  defp plan_label("pro"), do: "프로"
+  defp plan_label(other), do: other
 end

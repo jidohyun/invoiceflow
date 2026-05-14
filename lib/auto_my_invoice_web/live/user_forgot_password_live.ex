@@ -18,9 +18,9 @@ defmodule AutoMyInvoiceWeb.UserForgotPasswordLive do
               <span class="material-icons text-primary text-2xl">lock_reset</span>
             </div>
           </div>
-          <h2 class="text-2xl font-bold font-display mb-2">Reset your password</h2>
+          <h2 class="text-2xl font-bold font-display mb-2">비밀번호 재설정</h2>
           <p class="text-base-content/60 text-sm">
-            Password reset functionality is coming soon.
+            비밀번호 재설정 기능은 곧 제공됩니다.
           </p>
         </div>
 
@@ -28,13 +28,13 @@ defmodule AutoMyInvoiceWeb.UserForgotPasswordLive do
           <div class="flex gap-3">
             <span class="material-icons text-info text-xl shrink-0 mt-0.5">info</span>
             <p class="text-sm text-base-content/70">
-              In the meantime, please contact support if you need to reset your password.
+              당분간 비밀번호를 재설정해야 하는 경우 고객 지원으로 문의해 주세요.
             </p>
           </div>
         </div>
 
         <.link navigate={~p"/users/log_in"} class="btn btn-outline w-full">
-          Back to sign in
+          로그인 화면으로
         </.link>
       </div>
     </div>

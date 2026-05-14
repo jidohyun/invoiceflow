@@ -31,16 +31,17 @@ defmodule AutoMyInvoiceWeb.Layouts do
 
       <%!-- Navigation --%>
       <nav class="flex-1 mt-2 px-4 space-y-1">
-        <.sidebar_nav_item href="/" icon="dashboard" label="Dashboard" />
-        <.sidebar_nav_item href="/invoices" icon="description" label="Invoices" />
-        <.sidebar_nav_item href="/clients" icon="people" label="Clients" />
-        <.sidebar_nav_item href="/upload" icon="cloud_upload" label="Upload" />
+        <.sidebar_nav_item href="/" icon="dashboard" label="대시보드" />
+        <.sidebar_nav_item href="/invoices" icon="description" label="송장" />
+        <.sidebar_nav_item href="/clients" icon="people" label="거래처" />
+        <.sidebar_nav_item href="/upload" icon="cloud_upload" label="업로드" />
+        <.sidebar_nav_item href="/analytics" icon="bar_chart" label="분석" />
       </nav>
 
       <%!-- Bottom section --%>
       <div class="border-t border-base-300 p-4 space-y-2">
-        <.sidebar_nav_item href="/settings" icon="settings" label="Settings" />
-        <.sidebar_nav_item href="/settings/billing" icon="payments" label="Billing" />
+        <.sidebar_nav_item href="/settings" icon="settings" label="설정" />
+        <.sidebar_nav_item href="/settings/billing" icon="payments" label="결제" />
 
         <%= if @current_user do %>
           <div class="flex items-center gap-3 px-4 py-2 mt-2">
@@ -52,7 +53,7 @@ defmodule AutoMyInvoiceWeb.Layouts do
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium truncate"><%= @current_user.email %></p>
               <span class={"text-xs #{plan_text_class(@current_user.plan)}"}>
-                <%= String.capitalize(@current_user.plan || "free") %>
+                <%= plan_label(@current_user.plan || "free") %>
               </span>
             </div>
           </div>
@@ -62,7 +63,7 @@ defmodule AutoMyInvoiceWeb.Layouts do
             class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors w-full"
           >
             <span class="material-icons text-xl">logout</span>
-            Log out
+            로그아웃
           </.link>
         <% end %>
 
@@ -106,14 +107,15 @@ defmodule AutoMyInvoiceWeb.Layouts do
           </button>
         </div>
         <nav class="flex-1 mt-2 px-4 space-y-1">
-          <.sidebar_nav_item href="/" icon="dashboard" label="Dashboard" />
-          <.sidebar_nav_item href="/invoices" icon="description" label="Invoices" />
-          <.sidebar_nav_item href="/clients" icon="people" label="Clients" />
-          <.sidebar_nav_item href="/upload" icon="cloud_upload" label="Upload" />
+          <.sidebar_nav_item href="/" icon="dashboard" label="대시보드" />
+          <.sidebar_nav_item href="/invoices" icon="description" label="송장" />
+          <.sidebar_nav_item href="/clients" icon="people" label="거래처" />
+          <.sidebar_nav_item href="/upload" icon="cloud_upload" label="업로드" />
+          <.sidebar_nav_item href="/analytics" icon="bar_chart" label="분석" />
         </nav>
         <div class="border-t border-base-300 p-4 space-y-1">
-          <.sidebar_nav_item href="/settings" icon="settings" label="Settings" />
-          <.sidebar_nav_item href="/settings/billing" icon="payments" label="Billing" />
+          <.sidebar_nav_item href="/settings" icon="settings" label="설정" />
+          <.sidebar_nav_item href="/settings/billing" icon="payments" label="결제" />
         </div>
       </aside>
     </div>
@@ -150,6 +152,11 @@ defmodule AutoMyInvoiceWeb.Layouts do
   defp plan_text_class("pro"), do: "text-accent"
   defp plan_text_class(_), do: "text-base-content/40"
 
+  defp plan_label("free"), do: "무료"
+  defp plan_label("starter"), do: "스타터"
+  defp plan_label("pro"), do: "프로"
+  defp plan_label(other), do: other
+
   @doc """
   Shows the flash group with standard titles and content.
 
@@ -169,24 +176,24 @@ defmodule AutoMyInvoiceWeb.Layouts do
       <.flash
         id="client-error"
         kind={:error}
-        title={gettext("We can't find the internet")}
+        title="인터넷 연결을 찾을 수 없습니다"
         phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
         phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
         hidden
       >
-        {gettext("Attempting to reconnect")}
+        재연결 중...
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
 
       <.flash
         id="server-error"
         kind={:error}
-        title={gettext("Something went wrong!")}
+        title="문제가 발생했습니다"
         phx-disconnected={show(".phx-server-error #server-error") |> JS.remove_attribute("hidden")}
         phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
         hidden
       >
-        {gettext("Attempting to reconnect")}
+        재연결 중...
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
     </div>

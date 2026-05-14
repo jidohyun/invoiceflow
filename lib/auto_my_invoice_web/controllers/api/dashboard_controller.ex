@@ -7,7 +7,7 @@ defmodule AutoMyInvoiceWeb.Api.DashboardController do
   def index(conn, _params) do
     user = conn.assigns.current_user
 
-    {outstanding_amount, overdue_count} = Invoices.total_outstanding(user)
+    {outstanding_amount, overdue_count, _currency} = Invoices.total_outstanding(user)
     rate = Invoices.collection_rate(user)
     collected = Invoices.collected_this_month(user.id)
 

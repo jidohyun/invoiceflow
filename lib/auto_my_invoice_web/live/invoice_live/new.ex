@@ -20,16 +20,16 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.New do
 
     {:ok,
      socket
-     |> assign(:page_title, "New Invoice")
+     |> assign(:page_title, "새 송장")
      |> assign(:prefill, prefill)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header title="New Invoice">
+    <.page_header title="새 송장">
       <:actions>
-        <.link navigate={~p"/invoices"} class="btn btn-ghost btn-sm">← Back</.link>
+        <.link navigate={~p"/invoices"} class="btn btn-ghost btn-sm">← 목록</.link>
       </:actions>
     </.page_header>
 

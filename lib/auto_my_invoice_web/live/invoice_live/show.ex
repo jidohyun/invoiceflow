@@ -31,13 +31,13 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
          socket
          |> assign(:invoice, invoice)
          |> assign(:reminders, reminders)
-         |> put_flash(:info, "Invoice sent successfully")}
+         |> put_flash(:info, "송장이 발송되었습니다")}
 
       {:error, :not_draft} ->
-        {:noreply, put_flash(socket, :error, "Only draft invoices can be sent")}
+        {:noreply, put_flash(socket, :error, "임시저장 상태의 송장만 발송할 수 있습니다")}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Could not send invoice")}
+        {:noreply, put_flash(socket, :error, "송장을 발송할 수 없습니다")}
     end
   end
 
@@ -48,10 +48,10 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
         {:noreply,
          socket
          |> assign(:invoice, invoice)
-         |> put_flash(:info, "Invoice marked as paid")}
+         |> put_flash(:info, "결제완료로 처리되었습니다")}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Could not mark as paid")}
+        {:noreply, put_flash(socket, :error, "결제완료 처리에 실패했습니다")}
     end
   end
 
@@ -61,11 +61,11 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
       {:ok, _} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Invoice deleted")
+         |> put_flash(:info, "송장이 삭제되었습니다")
          |> push_navigate(to: ~p"/invoices")}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Could not delete invoice")}
+        {:noreply, put_flash(socket, :error, "송장을 삭제할 수 없습니다")}
     end
   end
 
@@ -96,31 +96,31 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
     <.page_header title={@invoice.invoice_number}>
       <:actions>
         <.link :if={:edit in @actions} navigate={~p"/invoices/#{@invoice.id}/edit"} class="btn btn-ghost btn-sm">
-          <.icon name="hero-pencil" class="size-4" /> Edit
+          <.icon name="hero-pencil" class="size-4" /> 수정
         </.link>
-        <button :if={:send in @actions} class="btn btn-info btn-sm" phx-click="send" data-confirm="Send this invoice?">
-          <.icon name="hero-paper-airplane" class="size-4" /> Send
+        <button :if={:send in @actions} class="btn btn-info btn-sm" phx-click="send" data-confirm="이 송장을 발송하시겠습니까?">
+          <.icon name="hero-paper-airplane" class="size-4" /> 발송
         </button>
-        <button :if={:mark_paid in @actions} class="btn btn-success btn-sm" phx-click="mark_paid" data-confirm="Mark as paid?">
-          <.icon name="hero-check-circle" class="size-4" /> Mark Paid
+        <button :if={:mark_paid in @actions} class="btn btn-success btn-sm" phx-click="mark_paid" data-confirm="결제완료로 처리하시겠습니까?">
+          <.icon name="hero-check-circle" class="size-4" /> 결제완료
         </button>
-        <button :if={:delete in @actions} class="btn btn-error btn-sm" phx-click="delete" data-confirm="Delete this invoice?">
-          <.icon name="hero-trash" class="size-4" /> Delete
+        <button :if={:delete in @actions} class="btn btn-error btn-sm" phx-click="delete" data-confirm="이 송장을 삭제하시겠습니까?">
+          <.icon name="hero-trash" class="size-4" /> 삭제
         </button>
         <.link href={~p"/invoices/#{@invoice.id}/pdf"} class="btn btn-ghost btn-sm" target="_blank">
           <.icon name="hero-arrow-down-tray" class="size-4" /> PDF
         </.link>
-        <.link navigate={~p"/invoices"} class="btn btn-ghost btn-sm">← Back</.link>
+        <.link navigate={~p"/invoices"} class="btn btn-ghost btn-sm">← 목록</.link>
       </:actions>
     </.page_header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
       <div class="card bg-base-100 shadow lg:col-span-2">
         <div class="card-body">
-          <h2 class="card-title text-lg">Invoice Details</h2>
+          <h2 class="card-title text-lg">송장 상세</h2>
           <div class="grid grid-cols-2 gap-4 mt-2">
             <div>
-              <span class="text-sm text-base-content/60">Client</span>
+              <span class="text-sm text-base-content/60">거래처</span>
               <p>
                 <%= if @invoice.client do %>
                   <.link navigate={~p"/clients/#{@invoice.client.id}"} class="link link-primary">
@@ -132,31 +132,31 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
               </p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Status</span>
+              <span class="text-sm text-base-content/60">상태</span>
               <p><.status_badge status={@invoice.status} /></p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Amount</span>
+              <span class="text-sm text-base-content/60">금액</span>
               <p class="text-xl font-bold"><.money amount={@invoice.amount} currency={@invoice.currency} /></p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Due Date</span>
+              <span class="text-sm text-base-content/60">지급 기한</span>
               <p><.date_display date={@invoice.due_date} /></p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Created</span>
+              <span class="text-sm text-base-content/60">작성일</span>
               <p><.date_display date={@invoice.inserted_at} format="short" /></p>
             </div>
             <div :if={@invoice.sent_at}>
-              <span class="text-sm text-base-content/60">Sent</span>
+              <span class="text-sm text-base-content/60">발송일</span>
               <p><.date_display date={@invoice.sent_at} format="short" /></p>
             </div>
             <div :if={@invoice.paid_at}>
-              <span class="text-sm text-base-content/60">Paid</span>
+              <span class="text-sm text-base-content/60">결제일</span>
               <p><.date_display date={@invoice.paid_at} format="short" /></p>
             </div>
             <div :if={@invoice.paddle_payment_link && @invoice.status in ~w(sent overdue)} class="col-span-2">
-              <span class="text-sm text-base-content/60">Payment Link</span>
+              <span class="text-sm text-base-content/60">결제 링크</span>
               <p>
                 <a href={@invoice.paddle_payment_link} target="_blank" class="link link-primary text-sm break-all">
                   {@invoice.paddle_payment_link}
@@ -165,7 +165,7 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
             </div>
           </div>
           <div :if={@invoice.notes} class="mt-4">
-            <span class="text-sm text-base-content/60">Notes</span>
+            <span class="text-sm text-base-content/60">메모</span>
             <p class="whitespace-pre-wrap">{@invoice.notes}</p>
           </div>
         </div>
@@ -173,20 +173,20 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
 
       <div class="card bg-base-100 shadow">
         <div class="card-body">
-          <h2 class="card-title text-lg">Payment Summary</h2>
+          <h2 class="card-title text-lg">결제 요약</h2>
           <div class="space-y-3 mt-2">
             <div>
-              <span class="text-sm text-base-content/60">Total</span>
+              <span class="text-sm text-base-content/60">총액</span>
               <p class="text-xl font-bold"><.money amount={@invoice.amount} currency={@invoice.currency} /></p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Paid</span>
+              <span class="text-sm text-base-content/60">입금액</span>
               <p class="text-xl font-bold text-success">
                 <.money amount={@invoice.paid_amount || Decimal.new(0)} currency={@invoice.currency} />
               </p>
             </div>
             <div>
-              <span class="text-sm text-base-content/60">Remaining</span>
+              <span class="text-sm text-base-content/60">잔액</span>
               <p class="text-xl font-bold text-warning">
                 <.money
                   amount={Decimal.sub(@invoice.amount || Decimal.new(0), @invoice.paid_amount || Decimal.new(0))}
@@ -201,18 +201,18 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
 
     <div class="card bg-base-100 shadow mb-6">
       <div class="card-body">
-        <h2 class="card-title text-lg">Line Items</h2>
+        <h2 class="card-title text-lg">품목</h2>
         <%= if @invoice.items == [] do %>
-          <p class="text-base-content/60 mt-2">No line items</p>
+          <p class="text-base-content/60 mt-2">등록된 품목이 없습니다</p>
         <% else %>
           <div class="overflow-x-auto mt-2">
             <table class="table">
               <thead>
                 <tr>
-                  <th>Description</th>
-                  <th class="text-right">Qty</th>
-                  <th class="text-right">Unit Price</th>
-                  <th class="text-right">Total</th>
+                  <th>품목명</th>
+                  <th class="text-right">수량</th>
+                  <th class="text-right">단가</th>
+                  <th class="text-right">합계</th>
                 </tr>
               </thead>
               <tbody>
@@ -225,7 +225,7 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
               </tbody>
               <tfoot>
                 <tr class="font-bold">
-                  <td colspan="3" class="text-right">Total</td>
+                  <td colspan="3" class="text-right">총액</td>
                   <td class="text-right"><.money amount={@invoice.amount} currency={@invoice.currency} /></td>
                 </tr>
               </tfoot>
@@ -237,11 +237,11 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
 
     <div :if={@reminders != []} class="card bg-base-100 shadow">
       <div class="card-body">
-        <h2 class="card-title text-lg">Reminder Timeline</h2>
+        <h2 class="card-title text-lg">리마인더 타임라인</h2>
         <.timeline>
           <:item
             :for={r <- @reminders}
-            title={"Step #{r.step} Reminder"}
+            title={"#{r.step}단계 리마인더"}
             description={status_text(r)}
             datetime={format_reminder_time(r)}
             status={to_string(reminder_status(r))}
@@ -254,18 +254,18 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
 
   defp format_reminder_time(r) do
     dt = r.scheduled_at || r.sent_at || r.inserted_at
-    if dt, do: Calendar.strftime(dt, "%b %d, %Y"), else: "-"
+    if dt, do: Calendar.strftime(dt, "%Y년 %m월 %d일"), else: "-"
   end
 
   defp status_text(reminder) do
     case reminder.status do
-      "pending" -> "Scheduled"
-      "scheduled" -> "Queued for delivery"
-      "sent" -> "Delivered"
-      "opened" -> "Opened by recipient"
-      "clicked" -> "Link clicked"
-      "failed" -> "Delivery failed"
-      "cancelled" -> "Cancelled"
+      "pending" -> "예약됨"
+      "scheduled" -> "발송 대기 중"
+      "sent" -> "발송 완료"
+      "opened" -> "수신자가 열람함"
+      "clicked" -> "링크 클릭됨"
+      "failed" -> "발송 실패"
+      "cancelled" -> "취소됨"
       _ -> reminder.status
     end
   end
