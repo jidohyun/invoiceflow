@@ -22,28 +22,28 @@ defmodule AutoMyInvoice.Emails.ReminderEmailTest do
     test "step 1 builds friendly reminder email" do
       email = ReminderEmail.build(build_assigns(1))
 
-      assert email.subject =~ "Friendly reminder"
+      assert email.subject =~ "결제 안내"
       assert email.subject =~ "INV-001"
       assert email.subject =~ "$1500.00"
-      assert email.html_body =~ "quick reminder"
-      assert email.text_body =~ "quick reminder"
+      assert email.html_body =~ "지급 기한"
+      assert email.text_body =~ "지급 기한"
       assert [{"Alice Corp", "alice@corp.com"}] = email.to
     end
 
     test "step 2 builds follow-up email with days overdue" do
       email = ReminderEmail.build(build_assigns(2))
 
-      assert email.subject =~ "Follow-up"
-      assert email.subject =~ "past due"
-      assert email.html_body =~ "Days Overdue"
+      assert email.subject =~ "확인 요청"
+      assert email.subject =~ "연체"
+      assert email.html_body =~ "경과일"
     end
 
     test "step 3 builds final notice email" do
       email = ReminderEmail.build(build_assigns(3))
 
-      assert email.subject =~ "Final notice"
-      assert email.html_body =~ "Final Payment Notice"
-      assert email.text_body =~ "FINAL NOTICE"
+      assert email.subject =~ "최종 통보"
+      assert email.html_body =~ "결제 최종 통보"
+      assert email.text_body =~ "최종 통보"
     end
 
     test "supports KRW currency" do
@@ -52,7 +52,7 @@ defmodule AutoMyInvoice.Emails.ReminderEmailTest do
       assigns = put_in(assigns, [:invoice, :amount], Decimal.new("150000"))
 
       email = ReminderEmail.build(assigns)
-      assert email.subject =~ "₩150000"
+      assert email.subject =~ "₩150,000"
     end
 
     test "sets correct from address" do
@@ -65,14 +65,14 @@ defmodule AutoMyInvoice.Emails.ReminderEmailTest do
       assigns = put_in(assigns, [:invoice, :paddle_payment_link], "https://checkout.paddle.com/test")
 
       email = ReminderEmail.build(assigns)
-      assert email.html_body =~ "Pay Now"
+      assert email.html_body =~ "바로 결제하기"
       assert email.html_body =~ "https://checkout.paddle.com/test"
       assert email.text_body =~ "https://checkout.paddle.com/test"
     end
 
     test "omits Pay Now button when no payment link" do
       email = ReminderEmail.build(build_assigns(1))
-      refute email.html_body =~ "Pay Now"
+      refute email.html_body =~ "바로 결제하기"
     end
   end
 end

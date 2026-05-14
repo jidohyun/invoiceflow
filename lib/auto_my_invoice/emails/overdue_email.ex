@@ -7,7 +7,7 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
 
   @spec build(map()) :: Swoosh.Email.t()
   def build(%{invoice: invoice, client: client, from_email: from_email}) do
-    due_date = Calendar.strftime(invoice.due_date, "%B %d, %Y")
+    due_date = Calendar.strftime(invoice.due_date, "%Y년 %m월 %d일")
     amount = format_amount(invoice.amount, invoice.currency)
     days_overdue = Date.diff(Date.utc_today(), invoice.due_date)
     payment_link = Map.get(invoice, :paddle_payment_link)
@@ -39,7 +39,7 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
     <html>
     <head><meta charset="UTF-8" />#{styles()}</head>
     <body>
-      <div class="header" style="color:#c62828;">연체 알림 / Overdue Notice</div>
+      <div class="header" style="color:#c62828;">연체 알림</div>
       <p>#{assigns.client_name}님께,</p>
       <p>송장 <strong>#{assigns.invoice_number}</strong>의 결제 기한이 <strong>#{assigns.days_overdue}일</strong> 경과하였습니다.
       아래 내역을 확인하시고 조속한 결제를 부탁드립니다.</p>
@@ -83,7 +83,7 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
   defp styles do
     """
     <style>
-      body { font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 24px; }
+      body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 24px; }
       .header { font-size: 22px; font-weight: bold; margin-bottom: 16px; }
       .details { background: #f9f9f9; border-radius: 6px; padding: 16px; margin: 16px 0; }
       .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
@@ -101,7 +101,7 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
     """
     <div style="text-align:center;margin:24px 0;">
       <a href="#{url}" style="display:inline-block;padding:12px 32px;background:#c62828;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:16px;">
-        지금 결제하기 / Pay Now
+        지금 결제하기
       </a>
     </div>
     """
@@ -115,6 +115,10 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
     "<div class=\"footer\">이 알림은 AutoMyInvoice에서 발송되었습니다.</div>"
   end
 
+  defp format_amount(%Decimal{} = amount, "KRW") do
+    "₩#{format_integer(amount)}"
+  end
+
   defp format_amount(%Decimal{} = amount, currency) do
     symbol = currency_symbol(currency)
     "#{symbol}#{Decimal.to_string(Decimal.round(amount, 2))}"
@@ -122,6 +126,30 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
 
   defp format_amount(amount, currency) when is_number(amount) do
     format_amount(Decimal.new(amount), currency)
+  end
+
+  defp format_integer(%Decimal{} = amount) do
+    amount
+    |> Decimal.round(0)
+    |> Decimal.to_integer()
+    |> Integer.to_string()
+    |> add_thousand_separator()
+  end
+
+  defp add_thousand_separator(str) do
+    sign = if String.starts_with?(str, "-"), do: "-", else: ""
+    digits = String.replace_leading(str, "-", "")
+
+    formatted =
+      digits
+      |> String.reverse()
+      |> String.graphemes()
+      |> Enum.chunk_every(3)
+      |> Enum.map(&Enum.join/1)
+      |> Enum.join(",")
+      |> String.reverse()
+
+    sign <> formatted
   end
 
   defp currency_symbol("USD"), do: "$"

@@ -45,7 +45,7 @@ defmodule AutoMyInvoice.Emails.OverdueEmailTest do
       assigns = put_in(assigns, [:invoice, :amount], Decimal.new("250000"))
 
       email = OverdueEmail.build(assigns)
-      assert email.subject =~ "₩250000"
+      assert email.subject =~ "₩250,000"
     end
 
     test "includes payment link when present" do
