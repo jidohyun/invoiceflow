@@ -156,7 +156,7 @@ defmodule AutoMyInvoice.ExtractionTest do
       extracted = %{}
       attrs = Extraction.to_invoice_attrs(extracted)
       assert attrs.amount == nil
-      assert attrs.currency == "USD"
+      assert attrs.currency == "KRW"
       assert attrs.due_date == nil
       assert attrs.items == []
     end

@@ -75,7 +75,7 @@ defmodule AutoMyInvoice.Extraction do
   def to_invoice_attrs(extracted_data) do
     %{
       amount: parse_decimal(extracted_data["amount"]),
-      currency: extracted_data["currency"] || "USD",
+      currency: extracted_data["currency"] || "KRW",
       due_date: parse_date(extracted_data["due_date"]),
       notes: extracted_data["notes"],
       items:
