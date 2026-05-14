@@ -10,7 +10,7 @@ defmodule AutoMyInvoice.Invoices.Invoice do
   schema "invoices" do
     field :invoice_number, :string
     field :amount, :decimal
-    field :currency, :string, default: "USD"
+    field :currency, :string, default: "KRW"
     field :due_date, :date
     field :status, :string, default: "draft"
     field :notes, :string
