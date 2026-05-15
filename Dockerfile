@@ -11,9 +11,9 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: https://pkgs.org/search/?q=googlechrome
 
-ARG ELIXIR_VERSION=1.15.7
-ARG OTP_VERSION=26.2.1
-ARG DEBIAN_VERSION=bookworm-20250113-slim
+ARG ELIXIR_VERSION=1.19.5
+ARG OTP_VERSION=27.2.4
+ARG DEBIAN_VERSION=bookworm-20260505-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
