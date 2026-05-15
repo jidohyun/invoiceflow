@@ -43,6 +43,22 @@ defmodule AutoMyInvoice.BillingTest do
     end
   end
 
+  describe "plans_ordered/0" do
+    # Regression: ISSUE-002 — billing page rendered plans alphabetically
+    # (Free → Pro $29 → Starter $9) because Elixir maps don't preserve
+    # insertion order. plans_ordered/0 sorts by price ascending so the
+    # billing UI shows Free → Starter → Pro.
+    # Found by /qa on 2026-05-15
+    # Report: .gstack/qa-reports/qa-report-localhost-2026-05-15.md
+    test "returns plans as a list sorted by price ascending" do
+      ordered = Billing.plans_ordered()
+      assert is_list(ordered)
+      assert Enum.map(ordered, fn {id, _plan} -> id end) == ["free", "starter", "pro"]
+      prices = Enum.map(ordered, fn {_id, plan} -> plan.price end)
+      assert prices == Enum.sort(prices)
+    end
+  end
+
   describe "plan_info/1" do
     test "returns correct plan info" do
       info = Billing.plan_info("starter")
