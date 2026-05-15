@@ -22,7 +22,14 @@ defmodule AutoMyInvoiceWeb.UploadLive do
     {:noreply, socket}
   end
 
-  @impl true
+  def handle_event("reset", _params, socket) do
+    # Allow the user to discard the current ExtractionJob view and return to
+    # the upload form so they can start over (e.g. after a low-confidence
+    # extraction or a failure). The ExtractionJob row is intentionally NOT
+    # deleted — historical jobs remain queryable for analytics and audit.
+    {:noreply, assign(socket, :extraction_job, nil)}
+  end
+
   def handle_event("upload", _params, socket) do
     user = socket.assigns.current_user
 
@@ -187,7 +194,7 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                     >
                       <.icon name="hero-document-plus" class="size-4" /> 송장 생성
                     </.link>
-                    <button class="btn btn-ghost" phx-click="reset" phx-target="">
+                    <button type="button" class="btn btn-ghost" phx-click="reset">
                       다른 파일 업로드
                     </button>
                   </div>
@@ -196,7 +203,7 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                     <.icon name="hero-x-circle" class="size-5" />
                     <span>추출 실패: {@extraction_job.error_message || "알 수 없는 오류"}</span>
                   </div>
-                  <button class="btn btn-ghost mt-4" phx-click="reset">
+                  <button type="button" class="btn btn-ghost mt-4" phx-click="reset">
                     다시 시도
                   </button>
               <% end %>
