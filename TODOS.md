@@ -8,3 +8,9 @@
 - **Context:** Sprint 1에서 record_payment/2를 paid_amount 누적 방식으로 구현. 별도 payments 테이블이 아니라 invoice.paid_amount 필드를 직접 조작하므로, 환불 시 paid_amount를 차감하고 상태를 역전환해야 함. @valid_transitions에 역방향 전환 추가 필요.
 - **Depends on:** record_payment 구현 완료 후
 - **Added:** 2026-03-31 by /plan-eng-review (outside voice finding)
+
+## (Nice-to-have) `/billing` → `/settings/billing` redirect
+- **What:** Phoenix Router에 `get "/billing"` → redirect(`/settings/billing`) 한 줄 추가
+- **Why:** dev 환경에서 `/billing` 직접 접근 시 디버그 라우트 에러 페이지 노출. 운영에서는 404로 정상 처리되지만, 사용자가 URL을 추측해 들어왔을 때 친절한 동작
+- **Severity:** Low
+- **Added:** 2026-05-15 by /qa (ISSUE-001, deferred — not a bug, optional UX polish)
