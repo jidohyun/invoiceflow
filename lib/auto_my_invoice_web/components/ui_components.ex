@@ -277,11 +277,11 @@ defmodule AutoMyInvoiceWeb.UiComponents do
       phx-drop-target={@upload && @upload.ref}
     >
       <.icon name="hero-cloud-arrow-up" class="size-12 text-base-content/30 mx-auto mb-4" />
-      <p class="text-lg font-medium">Drop files here or click to upload</p>
-      <p class="text-sm text-base-content/60 mt-1">Accepted: {@accepted} (max {@max_size})</p>
+      <p class="text-lg font-medium">파일을 여기로 끌어다 놓거나 클릭해서 업로드하세요</p>
+      <p class="text-sm text-base-content/60 mt-1">지원 형식: {@accepted} (최대 {@max_size})</p>
       <%= if @upload do %>
         <label class="btn btn-primary btn-sm mt-4 cursor-pointer">
-          Browse Files <.live_file_input upload={@upload} class="hidden" />
+          파일 선택 <.live_file_input upload={@upload} class="hidden" />
         </label>
       <% end %>
     </div>
