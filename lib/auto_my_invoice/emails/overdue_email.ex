@@ -3,10 +3,12 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
 
   import Swoosh.Email
 
-  @from_name "AutoMyInvoice"
+  @default_from_name "AutoMyInvoice"
+  @default_brand_color "#dc2626"
 
   @spec build(map()) :: Swoosh.Email.t()
-  def build(%{invoice: invoice, client: client, from_email: from_email}) do
+  def build(%{invoice: invoice, client: client, from_email: from_email} = args) do
+    user = Map.get(args, :user)
     due_date = Calendar.strftime(invoice.due_date, "%Y년 %m월 %d일")
     amount = format_amount(invoice.amount, invoice.currency)
     days_overdue = Date.diff(Date.utc_today(), invoice.due_date)
@@ -18,18 +20,25 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
       amount: amount,
       due_date: due_date,
       days_overdue: days_overdue,
-      payment_link: payment_link
+      payment_link: payment_link,
+      brand_color: brand_color(user)
     }
 
     {subject, html, text} = build_content(assigns)
 
     new()
     |> to({client.name, client.email})
-    |> from({@from_name, from_email})
+    |> from({brand_from_name(user), from_email})
     |> subject(subject)
     |> html_body(html)
     |> text_body(text)
   end
+
+  defp brand_from_name(%{company_name: name}) when is_binary(name) and name != "", do: name
+  defp brand_from_name(_), do: @default_from_name
+
+  defp brand_color(%{brand_color: color}) when is_binary(color) and color != "", do: color
+  defp brand_color(_), do: @default_brand_color
 
   defp build_content(assigns) do
     subject = "연체 알림: 송장 #{assigns.invoice_number} — #{assigns.amount} 미납"
@@ -39,15 +48,15 @@ defmodule AutoMyInvoice.Emails.OverdueEmail do
     <html>
     <head><meta charset="UTF-8" />#{styles()}</head>
     <body>
-      <div class="header" style="color:#c62828;">연체 알림</div>
+      <div class="header" style="background-color:#{assigns.brand_color}; color:#fff; padding:16px; border-radius:6px;">연체 알림</div>
       <p>#{assigns.client_name}님께,</p>
       <p>송장 <strong>#{assigns.invoice_number}</strong>의 결제 기한이 <strong>#{assigns.days_overdue}일</strong> 경과하였습니다.
       아래 내역을 확인하시고 조속한 결제를 부탁드립니다.</p>
-      <div class="details" style="border-left: 4px solid #c62828;">
+      <div class="details" style="border-left: 4px solid #{assigns.brand_color};">
         <div class="row"><span class="label">송장 번호</span><span>#{assigns.invoice_number}</span></div>
-        <div class="row"><span class="label">미납 금액</span><span class="amount" style="color:#c62828;">#{assigns.amount}</span></div>
+        <div class="row"><span class="label">미납 금액</span><span class="amount" style="color:#{assigns.brand_color};">#{assigns.amount}</span></div>
         <div class="row"><span class="label">결제 기한</span><span>#{assigns.due_date}</span></div>
-        <div class="row"><span class="label">연체 일수</span><span style="color:#c62828; font-weight:bold;">#{assigns.days_overdue}일</span></div>
+        <div class="row"><span class="label">연체 일수</span><span style="color:#{assigns.brand_color}; font-weight:bold;">#{assigns.days_overdue}일</span></div>
       </div>
       <p>이미 결제를 완료하셨다면 이 알림을 무시해 주세요.
       결제에 어려움이 있으시면 회신하여 주시기 바랍니다.</p>

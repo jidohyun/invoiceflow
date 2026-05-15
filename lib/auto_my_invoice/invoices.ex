@@ -113,13 +113,14 @@ defmodule AutoMyInvoice.Invoices do
     case Repo.transaction(multi) do
       {:ok, %{mark_sent: sent_invoice}} ->
         broadcast_invoice_change(sent_invoice)
-        sent_invoice = maybe_create_payment_link(Repo.preload(sent_invoice, :client))
+        sent_invoice = maybe_create_payment_link(Repo.preload(sent_invoice, [:client, :user]))
 
         email =
           InvoiceEmail.invoice_sent(%{
             invoice: sent_invoice,
             client: sent_invoice.client,
-            from_email: sender_email()
+            from_email: sender_email(),
+            user: sent_invoice.user
           })
 
         Mailer.deliver(email)

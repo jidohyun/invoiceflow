@@ -3,10 +3,14 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
 
   import Swoosh.Email
 
-  @from_name "AutoMyInvoice"
+  @default_from_name "AutoMyInvoice"
+  @default_brand_color "#0f172a"
 
   @spec build(map()) :: Swoosh.Email.t()
-  def build(%{reminder: reminder, invoice: invoice, client: client, from_email: from_email}) do
+  def build(
+        %{reminder: reminder, invoice: invoice, client: client, from_email: from_email} = args
+      ) do
+    user = Map.get(args, :user)
     due_date = format_date(invoice.due_date)
     amount = format_amount(invoice.amount, invoice.currency)
     days_overdue = Date.diff(Date.utc_today(), invoice.due_date)
@@ -28,18 +32,25 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
         amount: amount,
         due_date: due_date,
         days_overdue: days_overdue,
-        payment_link: tracked_payment_link
+        payment_link: tracked_payment_link,
+        brand_color: brand_color(user)
       })
 
     html = html <> tracking_pixel(base_url, reminder_id)
 
     new()
     |> to({client.name, client.email})
-    |> from({@from_name, from_email})
+    |> from({brand_from_name(user), from_email})
     |> subject(subject)
     |> html_body(html)
     |> text_body(text)
   end
+
+  defp brand_from_name(%{company_name: name}) when is_binary(name) and name != "", do: name
+  defp brand_from_name(_), do: @default_from_name
+
+  defp brand_color(%{brand_color: color}) when is_binary(color) and color != "", do: color
+  defp brand_color(_), do: @default_brand_color
 
   # Step 0: 수동 리마인더 (친근한 톤)
   defp content_for_step(0, assigns) do
@@ -50,7 +61,7 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
     <html lang="ko">
     <head><meta charset="UTF-8" />#{styles()}</head>
     <body>
-      <div class="header">결제 안내</div>
+      <div class="header" style="background-color:#{assigns.brand_color}; color:#fff; padding:14px; border-radius:6px;">결제 안내</div>
       <p>#{assigns.client_name} 담당자님께,</p>
       <p>송장 <strong>#{assigns.invoice_number}</strong> (<strong>#{assigns.amount}</strong>)의
       지급 기한이 <strong>#{assigns.due_date}</strong>이었음을 알려드립니다.</p>
@@ -94,7 +105,7 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
     <html lang="ko">
     <head><meta charset="UTF-8" />#{styles()}</head>
     <body>
-      <div class="header">결제 안내</div>
+      <div class="header" style="background-color:#{assigns.brand_color}; color:#fff; padding:14px; border-radius:6px;">결제 안내</div>
       <p>#{assigns.client_name} 담당자님께,</p>
       <p>송장 <strong>#{assigns.invoice_number}</strong> (<strong>#{assigns.amount}</strong>)의
       지급 기한이 <strong>#{assigns.due_date}</strong>이었습니다.</p>
@@ -137,7 +148,7 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
     <html lang="ko">
     <head><meta charset="UTF-8" />#{styles()}</head>
     <body>
-      <div class="header">결제 확인 요청</div>
+      <div class="header" style="background-color:#{assigns.brand_color}; color:#fff; padding:14px; border-radius:6px;">결제 확인 요청</div>
       <p>#{assigns.client_name} 담당자님께,</p>
       <p>송장 <strong>#{assigns.invoice_number}</strong> (<strong>#{assigns.amount}</strong>)
       건에 대해 확인 부탁드립니다. 지급 기한은 #{assigns.due_date}이었고,
@@ -184,7 +195,7 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
     <html lang="ko">
     <head><meta charset="UTF-8" />#{styles()}</head>
     <body>
-      <div class="header" style="color:#c62828;">결제 최종 통보</div>
+      <div class="header" style="background-color:#{assigns.brand_color}; color:#fff; padding:14px; border-radius:6px;">결제 최종 통보</div>
       <p>#{assigns.client_name} 담당자님께,</p>
       <p>송장 <strong>#{assigns.invoice_number}</strong> (<strong>#{assigns.amount}</strong>)
       건에 대한 최종 안내입니다. 현재 <strong>#{assigns.days_overdue}일 연체</strong> 상태입니다.</p>
