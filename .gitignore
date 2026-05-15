@@ -49,6 +49,9 @@ npm-debug.log
 # Hermes agent state
 .hermes/
 
+# Ouroboros local state
+.ouroboros/
+
 # Environment
 .env
 .env.*

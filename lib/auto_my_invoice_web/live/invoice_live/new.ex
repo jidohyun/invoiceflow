@@ -9,7 +9,12 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.New do
           job = AutoMyInvoice.Extraction.get_job!(job_id)
 
           if job.status == "completed" do
-            AutoMyInvoice.Extraction.to_invoice_attrs(job)
+            # Extraction.to_invoice_attrs/1 expects the string-keyed
+            # `extracted_data` map produced by the AI client — NOT the
+            # ExtractionJob struct itself. Passing the struct here would
+            # cause Access.get/3 to raise on Elixir 1.19+ because Ecto
+            # schemas do not implement the Access behaviour.
+            AutoMyInvoice.Extraction.to_invoice_attrs(job.extracted_data || %{})
           else
             %{}
           end

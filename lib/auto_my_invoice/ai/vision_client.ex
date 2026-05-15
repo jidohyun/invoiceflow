@@ -116,7 +116,9 @@ defmodule AutoMyInvoice.AI.VisionClient do
   defp media_type("png"), do: "image/png"
   defp media_type(_), do: "application/octet-stream"
 
-  defp parse_response(%{"choices" => [%{"message" => %{"content" => content}} | _]} = raw) do
+  @doc false
+  # Exposed for unit testing. Not part of the public API surface.
+  def parse_response(%{"choices" => [%{"message" => %{"content" => content}} | _]} = raw) do
     cleaned = content |> String.trim() |> strip_markdown_fences()
 
     case Jason.decode(cleaned) do
@@ -130,18 +132,20 @@ defmodule AutoMyInvoice.AI.VisionClient do
     end
   end
 
-  defp parse_response(raw) do
+  def parse_response(raw) do
     {:error, "Unexpected API response format: #{inspect(raw) |> String.slice(0..200)}"}
   end
 
-  defp strip_markdown_fences(text) do
+  @doc false
+  def strip_markdown_fences(text) do
     text
     |> String.replace(~r/^```json\s*/i, "")
     |> String.replace(~r/\s*```$/, "")
   end
 
-  defp parse_confidence(nil), do: 0.5
-  defp parse_confidence(c) when is_float(c), do: min(max(c, 0.0), 1.0)
-  defp parse_confidence(c) when is_integer(c), do: min(max(c / 1.0, 0.0), 1.0)
-  defp parse_confidence(_), do: 0.5
+  @doc false
+  def parse_confidence(nil), do: 0.5
+  def parse_confidence(c) when is_float(c), do: min(max(c, 0.0), 1.0)
+  def parse_confidence(c) when is_integer(c), do: min(max(c / 1.0, 0.0), 1.0)
+  def parse_confidence(_), do: 0.5
 end
