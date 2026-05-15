@@ -32,7 +32,9 @@ defmodule AutoMyInvoice.Workers.OverdueNotificationWorker do
 
   defp validate_invoice(nil), do: {:cancel, "invoice not found"}
   defp validate_invoice(%{overdue_notified_at: notified_at}) when not is_nil(notified_at), do: :ok
-  defp validate_invoice(%{status: status}) when status != "overdue", do: {:cancel, "invoice not overdue"}
+
+  defp validate_invoice(%{status: status}) when status != "overdue",
+    do: {:cancel, "invoice not overdue"}
 
   defp validate_invoice(%{client: %{email: email}}) when is_nil(email) or email == "",
     do: {:cancel, "no client email"}
@@ -40,7 +42,8 @@ defmodule AutoMyInvoice.Workers.OverdueNotificationWorker do
   defp validate_invoice(%{client: nil}), do: {:cancel, "no client email"}
   defp validate_invoice(_invoice), do: :ok
 
-  defp send_overdue_notification(%{overdue_notified_at: notified_at}) when not is_nil(notified_at) do
+  defp send_overdue_notification(%{overdue_notified_at: notified_at})
+       when not is_nil(notified_at) do
     # Already notified — idempotent skip
     :ok
   end

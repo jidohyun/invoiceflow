@@ -120,7 +120,10 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                   </button>
                 </div>
 
-                <div :for={err <- upload_errors(@uploads.invoice_file, entry)} class="text-error text-sm mt-1">
+                <div
+                  :for={err <- upload_errors(@uploads.invoice_file, entry)}
+                  class="text-error text-sm mt-1"
+                >
                   {error_to_string(err)}
                 </div>
               </div>
@@ -151,7 +154,6 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                     <span class="loading loading-spinner loading-md text-primary"></span>
                     <span class="text-base-content/60">문서 처리 중...</span>
                   </div>
-
                 <% "completed" -> %>
                   <div class="alert alert-success mb-4">
                     <.icon name="hero-check-circle" class="size-5" />
@@ -159,7 +161,10 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                   </div>
 
                   <div :if={@extraction_job.extracted_data} class="space-y-3">
-                    <div :for={{key, value} <- @extraction_job.extracted_data} class="flex justify-between border-b border-base-200 pb-2">
+                    <div
+                      :for={{key, value} <- @extraction_job.extracted_data}
+                      class="flex justify-between border-b border-base-200 pb-2"
+                    >
                       <span class="text-sm text-base-content/60">{humanize_key(key)}</span>
                       <span class="font-medium">{format_value(value)}</span>
                     </div>
@@ -186,7 +191,6 @@ defmodule AutoMyInvoiceWeb.UploadLive do
                       다른 파일 업로드
                     </button>
                   </div>
-
                 <% "failed" -> %>
                   <div class="alert alert-error">
                     <.icon name="hero-x-circle" class="size-5" />

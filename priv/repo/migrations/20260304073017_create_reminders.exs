@@ -4,7 +4,9 @@ defmodule AutoMyInvoice.Repo.Migrations.CreateReminders do
   def change do
     create table(:reminders, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :invoice_id, references(:invoices, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :invoice_id, references(:invoices, type: :binary_id, on_delete: :delete_all),
+        null: false
 
       add :step, :integer, null: false
       add :scheduled_at, :utc_datetime, null: false

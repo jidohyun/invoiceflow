@@ -32,9 +32,16 @@ defmodule AutoMyInvoice.Reminders.Reminder do
   def changeset(reminder, attrs) do
     reminder
     |> cast(attrs, [
-      :step, :scheduled_at, :sent_at, :status,
-      :email_subject, :email_body,
-      :opened_at, :clicked_at, :open_count, :click_count,
+      :step,
+      :scheduled_at,
+      :sent_at,
+      :status,
+      :email_subject,
+      :email_body,
+      :opened_at,
+      :clicked_at,
+      :open_count,
+      :click_count,
       :oban_job_id
     ])
     |> validate_required([:step, :scheduled_at])

@@ -40,11 +40,12 @@ defmodule AutoMyInvoiceWeb.Api.AuthController do
 
   def google(conn, %{"id_token" => id_token}) do
     with {:ok, claims} <- verify_google_id_token(id_token),
-         {:ok, user} <- Accounts.find_or_create_oauth_user(%{
-           email: claims["email"],
-           google_uid: claims["sub"],
-           avatar_url: claims["picture"]
-         }) do
+         {:ok, user} <-
+           Accounts.find_or_create_oauth_user(%{
+             email: claims["email"],
+             google_uid: claims["sub"],
+             avatar_url: claims["picture"]
+           }) do
       token = ApiAuth.sign_token(user.id)
       json(conn, %{data: %{token: token, user: JsonHelpers.render_user(user)}})
     else

@@ -27,7 +27,15 @@ defmodule AutoMyInvoice.Accounts.User do
     timestamps(type: :utc_datetime)
   end
 
-  @optional_fields [:company_name, :timezone, :brand_tone, :google_uid, :avatar_url, :plan, :paddle_customer_id]
+  @optional_fields [
+    :company_name,
+    :timezone,
+    :brand_tone,
+    :google_uid,
+    :avatar_url,
+    :plan,
+    :paddle_customer_id
+  ]
 
   def registration_changeset(user, attrs, opts \\ []) do
     user

@@ -101,7 +101,12 @@ defmodule AutoMyInvoice.AI.VisionClient do
         ]
 
       {:error, reason} ->
-        [%{type: "text", text: "Error reading file: #{inspect(reason)}. Please provide invoice details."}]
+        [
+          %{
+            type: "text",
+            text: "Error reading file: #{inspect(reason)}. Please provide invoice details."
+          }
+        ]
     end
   end
 

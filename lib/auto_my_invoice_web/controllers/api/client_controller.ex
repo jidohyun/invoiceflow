@@ -14,7 +14,11 @@ defmodule AutoMyInvoiceWeb.Api.ClientController do
       |> maybe_put(:search, params["q"])
 
     clients = Clients.list_clients(user.id, opts)
-    json(conn, %{data: Enum.map(clients, &JsonHelpers.render_client/1), meta: %{total: length(clients)}})
+
+    json(conn, %{
+      data: Enum.map(clients, &JsonHelpers.render_client/1),
+      meta: %{total: length(clients)}
+    })
   end
 
   def show(conn, %{"id" => id}) do

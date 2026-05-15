@@ -36,7 +36,9 @@ defmodule AutoMyInvoice.Repo.Migrations.CreateInvoices do
 
     create table(:invoice_items, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :invoice_id, references(:invoices, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :invoice_id, references(:invoices, type: :binary_id, on_delete: :delete_all),
+        null: false
 
       add :description, :string, null: false
       add :quantity, :decimal, precision: 10, scale: 2, default: 1

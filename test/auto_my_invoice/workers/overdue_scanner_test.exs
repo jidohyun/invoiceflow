@@ -35,7 +35,9 @@ defmodule AutoMyInvoice.Workers.OverdueScannerTest do
         currency: "USD",
         due_date: Date.add(Date.utc_today(), 30),
         client_id: client.id,
-        items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+        items: [
+          %{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}
+        ]
       })
 
     # Move to sent first (required transition from draft)

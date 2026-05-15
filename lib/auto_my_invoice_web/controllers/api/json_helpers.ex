@@ -14,8 +14,15 @@ defmodule AutoMyInvoiceWeb.Api.JsonHelpers do
       paid_at: invoice.paid_at,
       notes: invoice.notes,
       client_id: invoice.client_id,
-      client: if(Ecto.assoc_loaded?(invoice.client) && invoice.client, do: render_client(invoice.client)),
-      items: if(Ecto.assoc_loaded?(invoice.items), do: Enum.map(invoice.items, &render_item/1), else: []),
+      client:
+        if(Ecto.assoc_loaded?(invoice.client) && invoice.client,
+          do: render_client(invoice.client)
+        ),
+      items:
+        if(Ecto.assoc_loaded?(invoice.items),
+          do: Enum.map(invoice.items, &render_item/1),
+          else: []
+        ),
       inserted_at: invoice.inserted_at,
       updated_at: invoice.updated_at
     }

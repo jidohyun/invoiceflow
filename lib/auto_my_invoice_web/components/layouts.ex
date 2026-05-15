@@ -24,8 +24,7 @@ defmodule AutoMyInvoiceWeb.Layouts do
       <%!-- Logo --%>
       <div class="p-6">
         <a href="/" class="text-2xl font-display font-bold flex items-center gap-2 text-primary">
-          <span class="material-icons">receipt_long</span>
-          AutoMyInvoice
+          <span class="material-icons">receipt_long</span> AutoMyInvoice
         </a>
       </div>
 
@@ -47,13 +46,13 @@ defmodule AutoMyInvoiceWeb.Layouts do
           <div class="flex items-center gap-3 px-4 py-2 mt-2">
             <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <span class="text-xs font-bold text-primary">
-                <%= String.first(@current_user.email) |> String.upcase() %>
+                {String.first(@current_user.email) |> String.upcase()}
               </span>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate"><%= @current_user.email %></p>
+              <p class="text-sm font-medium truncate">{@current_user.email}</p>
               <span class={"text-xs #{plan_text_class(@current_user.plan)}"}>
-                <%= plan_label(@current_user.plan || "free") %>
+                {plan_label(@current_user.plan || "free")}
               </span>
             </div>
           </div>
@@ -62,8 +61,7 @@ defmodule AutoMyInvoiceWeb.Layouts do
             method="delete"
             class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors w-full"
           >
-            <span class="material-icons text-xl">logout</span>
-            로그아웃
+            <span class="material-icons text-xl">logout</span> 로그아웃
           </.link>
         <% end %>
 
@@ -77,7 +75,10 @@ defmodule AutoMyInvoiceWeb.Layouts do
     <header class="sticky top-0 z-30 bg-base-100 border-b border-base-300 lg:hidden">
       <div class="flex items-center justify-between px-4 py-3">
         <div class="flex items-center gap-3">
-          <button onclick="document.getElementById('mobile-sidebar').classList.toggle('hidden')" class="btn btn-ghost btn-sm btn-square">
+          <button
+            onclick="document.getElementById('mobile-sidebar').classList.toggle('hidden')"
+            class="btn btn-ghost btn-sm btn-square"
+          >
             <span class="material-icons">menu</span>
           </button>
           <span class="text-lg font-display font-bold text-primary">AutoMyInvoice</span>
@@ -96,8 +97,7 @@ defmodule AutoMyInvoiceWeb.Layouts do
       <aside class="relative w-64 h-full bg-base-100 flex flex-col shadow-xl overflow-y-auto">
         <div class="p-6 flex items-center justify-between">
           <a href="/" class="text-2xl font-display font-bold flex items-center gap-2 text-primary">
-            <span class="material-icons">receipt_long</span>
-            AutoMyInvoice
+            <span class="material-icons">receipt_long</span> AutoMyInvoice
           </a>
           <button
             onclick="document.getElementById('mobile-sidebar').classList.add('hidden')"
@@ -181,8 +181,7 @@ defmodule AutoMyInvoiceWeb.Layouts do
         phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
         hidden
       >
-        재연결 중...
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        재연결 중... <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
 
       <.flash
@@ -193,8 +192,7 @@ defmodule AutoMyInvoiceWeb.Layouts do
         phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
         hidden
       >
-        재연결 중...
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        재연결 중... <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
     </div>
     """

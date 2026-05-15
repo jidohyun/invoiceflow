@@ -56,7 +56,8 @@ defmodule AutoMyInvoice.Invoices do
 
   ## 생성
 
-  @spec create_invoice(Accounts.User.t(), map()) :: {:ok, Invoice.t()} | {:error, :plan_limit | Ecto.Changeset.t()}
+  @spec create_invoice(Accounts.User.t(), map()) ::
+          {:ok, Invoice.t()} | {:error, :plan_limit | Ecto.Changeset.t()}
   def create_invoice(user, attrs) do
     if Accounts.can_create_invoice?(user) do
       %Invoice{user_id: user.id}
@@ -98,7 +99,8 @@ defmodule AutoMyInvoice.Invoices do
   def send_invoice(%Invoice{} = invoice) do
     multi =
       Ecto.Multi.new()
-      |> Ecto.Multi.update(:mark_sent,
+      |> Ecto.Multi.update(
+        :mark_sent,
         invoice
         |> Invoice.status_changeset("sent")
         |> Ecto.Changeset.put_change(:sent_at, DateTime.truncate(DateTime.utc_now(), :second))
@@ -168,7 +170,8 @@ defmodule AutoMyInvoice.Invoices do
       true ->
         multi =
           Ecto.Multi.new()
-          |> Ecto.Multi.update_all(:atomic_update,
+          |> Ecto.Multi.update_all(
+            :atomic_update,
             from(i in Invoice,
               where: i.id == ^invoice.id,
               update: [set: [paid_amount: fragment("? + ?", i.paid_amount, ^amount)]]
@@ -218,7 +221,8 @@ defmodule AutoMyInvoice.Invoices do
   defp to_decimal(n) when is_binary(n), do: Decimal.new(n)
 
   @spec mark_as_overdue(Invoice.t()) :: {:ok, Invoice.t()}
-  def mark_as_overdue(%Invoice{status: status} = invoice) when status in ["sent", "partially_paid"] do
+  def mark_as_overdue(%Invoice{status: status} = invoice)
+      when status in ["sent", "partially_paid"] do
     invoice
     |> Invoice.status_changeset("overdue")
     |> Repo.update()
@@ -244,9 +248,17 @@ defmodule AutoMyInvoice.Invoices do
       select: %{
         total: coalesce(sum(i.amount - i.paid_amount), 0),
         count: count(i.id),
-        overdue_total: sum(fragment("CASE WHEN ? = 'overdue' THEN ? - ? ELSE 0 END",
-          i.status, i.amount, i.paid_amount)),
-        overdue_count: fragment("CAST(SUM(CASE WHEN ? = 'overdue' THEN 1 ELSE 0 END) AS integer)", i.status)
+        overdue_total:
+          sum(
+            fragment(
+              "CASE WHEN ? = 'overdue' THEN ? - ? ELSE 0 END",
+              i.status,
+              i.amount,
+              i.paid_amount
+            )
+          ),
+        overdue_count:
+          fragment("CAST(SUM(CASE WHEN ? = 'overdue' THEN 1 ELSE 0 END) AS integer)", i.status)
       }
     )
     |> Repo.one()
@@ -344,7 +356,9 @@ defmodule AutoMyInvoice.Invoices do
   defp maybe_filter_status(query, status), do: from(i in query, where: i.status == ^status)
 
   defp maybe_filter_client(query, nil), do: query
-  defp maybe_filter_client(query, client_id), do: from(i in query, where: i.client_id == ^client_id)
+
+  defp maybe_filter_client(query, client_id),
+    do: from(i in query, where: i.client_id == ^client_id)
 
   defp maybe_filter_search(query, nil), do: query
   defp maybe_filter_search(query, ""), do: query

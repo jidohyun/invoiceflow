@@ -14,8 +14,18 @@ defmodule AutoMyInvoice.PDF.InvoicePDFTest do
       paid_at: nil,
       notes: "Net 30 terms",
       items: [
-        %{description: "Web Development", quantity: Decimal.new(10), unit_price: Decimal.new("200.00"), total: Decimal.new("2000.00")},
-        %{description: "Design Review", quantity: Decimal.new(5), unit_price: Decimal.new("100.00"), total: Decimal.new("500.00")}
+        %{
+          description: "Web Development",
+          quantity: Decimal.new(10),
+          unit_price: Decimal.new("200.00"),
+          total: Decimal.new("2000.00")
+        },
+        %{
+          description: "Design Review",
+          quantity: Decimal.new(5),
+          unit_price: Decimal.new("100.00"),
+          total: Decimal.new("500.00")
+        }
       ]
     }
   end

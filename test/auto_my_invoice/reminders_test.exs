@@ -32,7 +32,9 @@ defmodule AutoMyInvoice.RemindersTest do
         currency: "USD",
         due_date: Date.add(Date.utc_today(), 30),
         client_id: client.id,
-        items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+        items: [
+          %{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}
+        ]
       })
 
     {:ok, sent} = Invoices.mark_as_sent(invoice)
@@ -63,16 +65,23 @@ defmodule AutoMyInvoice.RemindersTest do
     end
 
     test "validates step inclusion" do
-      changeset = Reminder.changeset(%Reminder{}, %{
-        step: 5, scheduled_at: DateTime.utc_now()
-      })
+      changeset =
+        Reminder.changeset(%Reminder{}, %{
+          step: 5,
+          scheduled_at: DateTime.utc_now()
+        })
+
       assert errors_on(changeset).step != []
     end
 
     test "validates status inclusion" do
-      changeset = Reminder.changeset(%Reminder{}, %{
-        step: 1, scheduled_at: DateTime.utc_now(), status: "invalid"
-      })
+      changeset =
+        Reminder.changeset(%Reminder{}, %{
+          step: 1,
+          scheduled_at: DateTime.utc_now(),
+          status: "invalid"
+        })
+
       assert errors_on(changeset).status != []
     end
 
@@ -85,20 +94,26 @@ defmodule AutoMyInvoice.RemindersTest do
 
   describe "ReminderTemplate schema" do
     test "creates template with valid attrs" do
-      changeset = ReminderTemplate.changeset(%ReminderTemplate{}, %{
-        step: 1,
-        tone: "friendly",
-        subject_template: "Invoice <%= @invoice_number %>",
-        body_template: "Hello <%= @client_name %>"
-      })
+      changeset =
+        ReminderTemplate.changeset(%ReminderTemplate{}, %{
+          step: 1,
+          tone: "friendly",
+          subject_template: "Invoice <%= @invoice_number %>",
+          body_template: "Hello <%= @client_name %>"
+        })
+
       assert changeset.valid?
     end
 
     test "validates tone inclusion" do
-      changeset = ReminderTemplate.changeset(%ReminderTemplate{}, %{
-        step: 1, tone: "angry",
-        subject_template: "test", body_template: "test"
-      })
+      changeset =
+        ReminderTemplate.changeset(%ReminderTemplate{}, %{
+          step: 1,
+          tone: "angry",
+          subject_template: "test",
+          body_template: "test"
+        })
+
       assert errors_on(changeset).tone != []
     end
   end
@@ -162,7 +177,9 @@ defmodule AutoMyInvoice.RemindersTest do
           currency: "USD",
           due_date: next_friday,
           client_id: client.id,
-          items: [%{description: "Test", quantity: Decimal.new(1), unit_price: Decimal.new("500.00")}]
+          items: [
+            %{description: "Test", quantity: Decimal.new(1), unit_price: Decimal.new("500.00")}
+          ]
         })
 
       {:ok, sent} = Invoices.mark_as_sent(invoice)
@@ -186,7 +203,8 @@ defmodule AutoMyInvoice.RemindersTest do
 
       _r1 = create_reminder(invoice, 1, "scheduled")
       _r2 = create_reminder(invoice, 2, "pending")
-      _r3 = create_reminder(invoice, 3, "sent")  # 이미 발송됨 → 취소 안됨
+      # 이미 발송됨 → 취소 안됨
+      _r3 = create_reminder(invoice, 3, "sent")
 
       {cancelled_count, nil} = Reminders.cancel_pending_reminders(invoice.id)
       assert cancelled_count == 2
@@ -194,7 +212,8 @@ defmodule AutoMyInvoice.RemindersTest do
       reminders = Reminders.list_reminders_for_invoice(invoice.id)
       statuses = Enum.map(reminders, & &1.status)
       assert "cancelled" in statuses
-      assert "sent" in statuses  # 발송된 것은 그대로
+      # 발송된 것은 그대로
+      assert "sent" in statuses
     end
   end
 
@@ -212,7 +231,8 @@ defmodule AutoMyInvoice.RemindersTest do
       first_opened_at = opened.opened_at
       {:ok, opened_again} = Reminders.record_open(reminder.id)
       assert opened_again.open_count == 2
-      assert opened_again.opened_at == first_opened_at  # 최초 시각 유지
+      # 최초 시각 유지
+      assert opened_again.opened_at == first_opened_at
     end
   end
 
@@ -280,7 +300,13 @@ defmodule AutoMyInvoice.RemindersTest do
           currency: "USD",
           due_date: Date.add(Date.utc_today(), 30),
           client_id: client.id,
-          items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+          items: [
+            %{
+              description: "Service",
+              quantity: Decimal.new(1),
+              unit_price: Decimal.new("1000.00")
+            }
+          ]
         })
 
       invoice = Repo.preload(invoice, :client)

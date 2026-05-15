@@ -8,11 +8,13 @@ defmodule AutoMyInvoiceWeb.Api.FallbackController do
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)
-    |> json(%{error: %{
-      code: "validation_error",
-      message: "Invalid input",
-      details: JsonHelpers.changeset_errors(changeset)
-    }})
+    |> json(%{
+      error: %{
+        code: "validation_error",
+        message: "Invalid input",
+        details: JsonHelpers.changeset_errors(changeset)
+      }
+    })
   end
 
   def call(conn, {:error, :not_found}) do
@@ -42,6 +44,8 @@ defmodule AutoMyInvoiceWeb.Api.FallbackController do
   def call(conn, {:error, :plan_limit}) do
     conn
     |> put_status(:payment_required)
-    |> json(%{error: %{code: "plan_limit", message: "Monthly invoice limit reached. Upgrade your plan."}})
+    |> json(%{
+      error: %{code: "plan_limit", message: "Monthly invoice limit reached. Upgrade your plan."}
+    })
   end
 end

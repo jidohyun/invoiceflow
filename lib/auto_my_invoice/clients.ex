@@ -75,7 +75,9 @@ defmodule AutoMyInvoice.Clients do
 
     avg_payment_days =
       invoices
-      |> Enum.filter(fn inv -> inv.status == "paid" and inv.sent_at != nil and inv.paid_at != nil end)
+      |> Enum.filter(fn inv ->
+        inv.status == "paid" and inv.sent_at != nil and inv.paid_at != nil
+      end)
       |> case do
         [] ->
           nil
@@ -141,7 +143,8 @@ defmodule AutoMyInvoice.Clients do
     client_ids_with_enough_paid =
       from(i in Invoice,
         where: i.status == "paid",
-        join: c in Client, on: c.id == i.client_id,
+        join: c in Client,
+        on: c.id == i.client_id,
         where: c.user_id == ^user_id,
         group_by: i.client_id,
         having: count(i.id) >= 2,
@@ -224,6 +227,9 @@ defmodule AutoMyInvoice.Clients do
 
   defp maybe_search(query, search) do
     term = "%#{search}%"
-    from(c in query, where: ilike(c.name, ^term) or ilike(c.email, ^term) or ilike(c.company, ^term))
+
+    from(c in query,
+      where: ilike(c.name, ^term) or ilike(c.email, ^term) or ilike(c.company, ^term)
+    )
   end
 end

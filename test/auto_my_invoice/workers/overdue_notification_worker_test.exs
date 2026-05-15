@@ -17,7 +17,12 @@ defmodule AutoMyInvoice.Workers.OverdueNotificationWorkerTest do
   end
 
   defp create_overdue_invoice(user, opts \\ []) do
-    client_email = Keyword.get(opts, :client_email, "onw-client-#{System.unique_integer([:positive])}@example.com")
+    client_email =
+      Keyword.get(
+        opts,
+        :client_email,
+        "onw-client-#{System.unique_integer([:positive])}@example.com"
+      )
 
     {:ok, client} =
       Clients.create_client(user.id, %{
@@ -33,7 +38,9 @@ defmodule AutoMyInvoice.Workers.OverdueNotificationWorkerTest do
         currency: "USD",
         due_date: Date.add(Date.utc_today(), 30),
         client_id: client.id,
-        items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("750.00")}]
+        items: [
+          %{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("750.00")}
+        ]
       })
 
     {:ok, sent} = Invoices.mark_as_sent(invoice)
@@ -97,7 +104,9 @@ defmodule AutoMyInvoice.Workers.OverdueNotificationWorkerTest do
           currency: "USD",
           due_date: Date.add(Date.utc_today(), 30),
           client_id: client.id,
-          items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("500.00")}]
+          items: [
+            %{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("500.00")}
+          ]
         })
 
       {:ok, sent} = Invoices.mark_as_sent(invoice)

@@ -30,10 +30,17 @@ defmodule AutoMyInvoice.Extraction.ExtractionJob do
   def changeset(job, attrs) do
     job
     |> cast(attrs, [
-      :file_url, :file_type, :status, :error_message,
-      :raw_response, :extracted_data, :confidence_score,
-      :processing_started_at, :processing_completed_at,
-      :oban_job_id, :invoice_id
+      :file_url,
+      :file_type,
+      :status,
+      :error_message,
+      :raw_response,
+      :extracted_data,
+      :confidence_score,
+      :processing_started_at,
+      :processing_completed_at,
+      :oban_job_id,
+      :invoice_id
     ])
     |> validate_required([:file_url, :file_type])
     |> validate_inclusion(:status, @statuses)

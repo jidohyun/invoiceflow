@@ -18,22 +18,34 @@ defmodule AutoMyInvoice.AnalyticsTest do
 
   defp create_client(user, attrs \\ %{}) do
     {:ok, client} =
-      Clients.create_client(user.id, Map.merge(%{
-        name: "Client #{System.unique_integer([:positive])}",
-        email: "client-#{System.unique_integer([:positive])}@example.com"
-      }, attrs))
+      Clients.create_client(
+        user.id,
+        Map.merge(
+          %{
+            name: "Client #{System.unique_integer([:positive])}",
+            email: "client-#{System.unique_integer([:positive])}@example.com"
+          },
+          attrs
+        )
+      )
 
     client
   end
 
   defp create_invoice(user, client, attrs) do
     {:ok, invoice} =
-      Invoices.create_invoice(user, Map.merge(%{
-        amount: Decimal.new("1000.00"),
-        currency: "USD",
-        due_date: Date.add(Date.utc_today(), 30),
-        client_id: client.id
-      }, attrs))
+      Invoices.create_invoice(
+        user,
+        Map.merge(
+          %{
+            amount: Decimal.new("1000.00"),
+            currency: "USD",
+            due_date: Date.add(Date.utc_today(), 30),
+            client_id: client.id
+          },
+          attrs
+        )
+      )
 
     invoice
   end
@@ -44,6 +56,7 @@ defmodule AutoMyInvoice.AnalyticsTest do
       result = Analytics.monthly_collections(user.id, 3)
 
       assert length(result) == 3
+
       Enum.each(result, fn row ->
         assert row.invoiced == Decimal.new(0)
         assert row.collected == Decimal.new(0)
@@ -137,17 +150,21 @@ defmodule AutoMyInvoice.AnalyticsTest do
       client = create_client(user)
 
       # Invoice due 10 days ago -> 0-30 bucket
-      inv1 = create_invoice(user, client, %{
-        amount: Decimal.new("100.00"),
-        due_date: Date.add(Date.utc_today(), 10)
-      })
+      inv1 =
+        create_invoice(user, client, %{
+          amount: Decimal.new("100.00"),
+          due_date: Date.add(Date.utc_today(), 10)
+        })
+
       {:ok, _} = Invoices.mark_as_sent(inv1)
 
       # Invoice due 45 days ago -> 31-60 bucket
-      inv2 = create_invoice(user, client, %{
-        amount: Decimal.new("200.00"),
-        due_date: Date.add(Date.utc_today(), 10)
-      })
+      inv2 =
+        create_invoice(user, client, %{
+          amount: Decimal.new("200.00"),
+          due_date: Date.add(Date.utc_today(), 10)
+        })
+
       {:ok, _} = Invoices.mark_as_sent(inv2)
       # Update due_date directly so it appears overdue by 45 days
       Repo.update_all(
@@ -178,16 +195,20 @@ defmodule AutoMyInvoice.AnalyticsTest do
 
       # Set avg_payment_days on client
       Clients.update_client(client, %{})
+
       Repo.update_all(
         from(c in AutoMyInvoice.Clients.Client, where: c.id == ^client.id),
         set: [avg_payment_days: 5]
       )
 
       due_date = Date.add(Date.utc_today(), 10)
-      inv = create_invoice(user, client, %{
-        amount: Decimal.new("500.00"),
-        due_date: due_date
-      })
+
+      inv =
+        create_invoice(user, client, %{
+          amount: Decimal.new("500.00"),
+          due_date: due_date
+        })
+
       {:ok, _} = Invoices.mark_as_sent(inv)
 
       result = Analytics.cashflow_forecast(user.id, 90)
@@ -223,10 +244,12 @@ defmodule AutoMyInvoice.AnalyticsTest do
       client = create_client(user)
 
       # Invoice due 100 days from now, no avg_payment_days offset
-      inv = create_invoice(user, client, %{
-        amount: Decimal.new("1000.00"),
-        due_date: Date.add(Date.utc_today(), 100)
-      })
+      inv =
+        create_invoice(user, client, %{
+          amount: Decimal.new("1000.00"),
+          due_date: Date.add(Date.utc_today(), 100)
+        })
+
       {:ok, _} = Invoices.mark_as_sent(inv)
 
       # With 90 day horizon, should be excluded

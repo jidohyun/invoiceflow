@@ -103,17 +103,19 @@ defmodule AutoMyInvoice.Extraction do
         {:existing, client}
 
       _ ->
-        {:suggested, %{
-          name: extracted_data["client_name"],
-          email: email,
-          company: extracted_data["client_company"]
-        }}
+        {:suggested,
+         %{
+           name: extracted_data["client_name"],
+           email: email,
+           company: extracted_data["client_company"]
+         }}
     end
   end
 
   ## Private
 
   defp parse_decimal(nil), do: nil
+
   defp parse_decimal(value) when is_binary(value) do
     case Decimal.parse(String.replace(value, ~r/[,$]/, "")) do
       {decimal, _} -> decimal
@@ -122,6 +124,7 @@ defmodule AutoMyInvoice.Extraction do
   end
 
   defp parse_date(nil), do: nil
+
   defp parse_date(value) when is_binary(value) do
     case Date.from_iso8601(value) do
       {:ok, date} -> date

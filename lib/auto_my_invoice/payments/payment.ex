@@ -22,7 +22,15 @@ defmodule AutoMyInvoice.Payments.Payment do
 
   def changeset(payment, attrs) do
     payment
-    |> cast(attrs, [:paddle_transaction_id, :amount, :currency, :status, :paid_at, :raw_webhook, :invoice_id])
+    |> cast(attrs, [
+      :paddle_transaction_id,
+      :amount,
+      :currency,
+      :status,
+      :paid_at,
+      :raw_webhook,
+      :invoice_id
+    ])
     |> validate_required([:paddle_transaction_id, :amount, :status, :paid_at, :invoice_id])
     |> validate_inclusion(:status, @statuses)
     |> validate_number(:amount, greater_than: 0)

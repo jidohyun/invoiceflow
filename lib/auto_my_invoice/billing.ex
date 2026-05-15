@@ -23,10 +23,11 @@ defmodule AutoMyInvoice.Billing do
   defp activate_subscription_impl(user_id, data, plan) do
     with {:ok, _sub} <- create_or_update_subscription(user_id, data, plan),
          user <- Accounts.get_user!(user_id),
-         {:ok, _user} <- Accounts.update_profile(user, %{
-           plan: plan,
-           paddle_customer_id: data["customer_id"]
-         }) do
+         {:ok, _user} <-
+           Accounts.update_profile(user, %{
+             plan: plan,
+             paddle_customer_id: data["customer_id"]
+           }) do
       :ok
     end
   end
@@ -64,7 +65,8 @@ defmodule AutoMyInvoice.Billing do
         sub
         |> Subscription.changeset(%{
           status: data["status"],
-          current_period_start: parse_datetime(get_in(data, ["current_billing_period", "starts_at"])),
+          current_period_start:
+            parse_datetime(get_in(data, ["current_billing_period", "starts_at"])),
           current_period_end: parse_datetime(get_in(data, ["current_billing_period", "ends_at"]))
         })
         |> Repo.update()

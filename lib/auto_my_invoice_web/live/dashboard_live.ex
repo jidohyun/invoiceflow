@@ -48,8 +48,7 @@ defmodule AutoMyInvoiceWeb.DashboardLive do
       <h2 class="text-3xl font-semibold font-display">한눈에 보기</h2>
       <div class="flex items-center gap-3">
         <span class="flex items-center text-sm font-medium text-success bg-success/10 px-3 py-1 rounded-full">
-          <span class="w-2 h-2 rounded-full bg-success mr-2 animate-pulse"></span>
-          실시간
+          <span class="w-2 h-2 rounded-full bg-success mr-2 animate-pulse"></span> 실시간
         </span>
         <.link navigate={~p"/upload"} class="btn btn-ghost btn-sm btn-circle">
           <span class="material-icons text-base-content/60">notifications</span>
@@ -68,8 +67,7 @@ defmodule AutoMyInvoiceWeb.DashboardLive do
           <.money amount={@outstanding_amount} currency={@outstanding_currency} />
         </p>
         <p class="text-sm text-error mt-2 flex items-center">
-          <span class="material-icons text-sm mr-1">trending_up</span>
-          연체 {to_string(@overdue_count)}건
+          <span class="material-icons text-sm mr-1">trending_up</span> 연체 {to_string(@overdue_count)}건
         </p>
       </div>
 
@@ -89,8 +87,7 @@ defmodule AutoMyInvoiceWeb.DashboardLive do
         <h3 class="text-base-content/60 text-sm font-medium mb-2">진행 중인 리마인더</h3>
         <p class="text-3xl font-bold">{to_string(@active_reminders)}</p>
         <p class="text-sm text-success mt-2 flex items-center">
-          <span class="material-icons text-sm mr-1">schedule</span>
-          자동 팔로업
+          <span class="material-icons text-sm mr-1">schedule</span> 자동 팔로업
         </p>
       </div>
     </div>
@@ -233,5 +230,4 @@ defmodule AutoMyInvoiceWeb.DashboardLive do
   end
 
   defp overdue?(_), do: false
-
 end

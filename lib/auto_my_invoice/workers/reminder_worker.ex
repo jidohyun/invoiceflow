@@ -45,12 +45,13 @@ defmodule AutoMyInvoice.Workers.ReminderWorker do
 
     reminder_with_tracking = Map.put(reminder, :tracking_base_url, base_url)
 
-    email = ReminderEmail.build(%{
-      reminder: reminder_with_tracking,
-      invoice: invoice,
-      client: client,
-      from_email: from_email
-    })
+    email =
+      ReminderEmail.build(%{
+        reminder: reminder_with_tracking,
+        invoice: invoice,
+        client: client,
+        from_email: from_email
+      })
 
     case Mailer.deliver(email) do
       {:ok, _} ->

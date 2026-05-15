@@ -95,16 +95,35 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
     ~H"""
     <.page_header title={@invoice.invoice_number}>
       <:actions>
-        <.link :if={:edit in @actions} navigate={~p"/invoices/#{@invoice.id}/edit"} class="btn btn-ghost btn-sm">
+        <.link
+          :if={:edit in @actions}
+          navigate={~p"/invoices/#{@invoice.id}/edit"}
+          class="btn btn-ghost btn-sm"
+        >
           <.icon name="hero-pencil" class="size-4" /> 수정
         </.link>
-        <button :if={:send in @actions} class="btn btn-info btn-sm" phx-click="send" data-confirm="이 송장을 발송하시겠습니까?">
+        <button
+          :if={:send in @actions}
+          class="btn btn-info btn-sm"
+          phx-click="send"
+          data-confirm="이 송장을 발송하시겠습니까?"
+        >
           <.icon name="hero-paper-airplane" class="size-4" /> 발송
         </button>
-        <button :if={:mark_paid in @actions} class="btn btn-success btn-sm" phx-click="mark_paid" data-confirm="결제완료로 처리하시겠습니까?">
+        <button
+          :if={:mark_paid in @actions}
+          class="btn btn-success btn-sm"
+          phx-click="mark_paid"
+          data-confirm="결제완료로 처리하시겠습니까?"
+        >
           <.icon name="hero-check-circle" class="size-4" /> 결제완료
         </button>
-        <button :if={:delete in @actions} class="btn btn-error btn-sm" phx-click="delete" data-confirm="이 송장을 삭제하시겠습니까?">
+        <button
+          :if={:delete in @actions}
+          class="btn btn-error btn-sm"
+          phx-click="delete"
+          data-confirm="이 송장을 삭제하시겠습니까?"
+        >
           <.icon name="hero-trash" class="size-4" /> 삭제
         </button>
         <.link href={~p"/invoices/#{@invoice.id}/pdf"} class="btn btn-ghost btn-sm" target="_blank">
@@ -137,7 +156,9 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
             </div>
             <div>
               <span class="text-sm text-base-content/60">금액</span>
-              <p class="text-xl font-bold"><.money amount={@invoice.amount} currency={@invoice.currency} /></p>
+              <p class="text-xl font-bold">
+                <.money amount={@invoice.amount} currency={@invoice.currency} />
+              </p>
             </div>
             <div>
               <span class="text-sm text-base-content/60">지급 기한</span>
@@ -155,10 +176,17 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
               <span class="text-sm text-base-content/60">결제일</span>
               <p><.date_display date={@invoice.paid_at} format="short" /></p>
             </div>
-            <div :if={@invoice.paddle_payment_link && @invoice.status in ~w(sent overdue)} class="col-span-2">
+            <div
+              :if={@invoice.paddle_payment_link && @invoice.status in ~w(sent overdue)}
+              class="col-span-2"
+            >
               <span class="text-sm text-base-content/60">결제 링크</span>
               <p>
-                <a href={@invoice.paddle_payment_link} target="_blank" class="link link-primary text-sm break-all">
+                <a
+                  href={@invoice.paddle_payment_link}
+                  target="_blank"
+                  class="link link-primary text-sm break-all"
+                >
                   {@invoice.paddle_payment_link}
                 </a>
               </p>
@@ -177,7 +205,9 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
           <div class="space-y-3 mt-2">
             <div>
               <span class="text-sm text-base-content/60">총액</span>
-              <p class="text-xl font-bold"><.money amount={@invoice.amount} currency={@invoice.currency} /></p>
+              <p class="text-xl font-bold">
+                <.money amount={@invoice.amount} currency={@invoice.currency} />
+              </p>
             </div>
             <div>
               <span class="text-sm text-base-content/60">입금액</span>
@@ -189,7 +219,12 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
               <span class="text-sm text-base-content/60">잔액</span>
               <p class="text-xl font-bold text-warning">
                 <.money
-                  amount={Decimal.sub(@invoice.amount || Decimal.new(0), @invoice.paid_amount || Decimal.new(0))}
+                  amount={
+                    Decimal.sub(
+                      @invoice.amount || Decimal.new(0),
+                      @invoice.paid_amount || Decimal.new(0)
+                    )
+                  }
                   currency={@invoice.currency}
                 />
               </p>
@@ -219,14 +254,20 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.Show do
                 <tr :for={item <- @invoice.items}>
                   <td>{item.description}</td>
                   <td class="text-right">{item.quantity}</td>
-                  <td class="text-right"><.money amount={item.unit_price} currency={@invoice.currency} /></td>
-                  <td class="text-right font-medium"><.money amount={item.total} currency={@invoice.currency} /></td>
+                  <td class="text-right">
+                    <.money amount={item.unit_price} currency={@invoice.currency} />
+                  </td>
+                  <td class="text-right font-medium">
+                    <.money amount={item.total} currency={@invoice.currency} />
+                  </td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr class="font-bold">
                   <td colspan="3" class="text-right">총액</td>
-                  <td class="text-right"><.money amount={@invoice.amount} currency={@invoice.currency} /></td>
+                  <td class="text-right">
+                    <.money amount={@invoice.amount} currency={@invoice.currency} />
+                  </td>
                 </tr>
               </tfoot>
             </table>

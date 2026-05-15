@@ -50,7 +50,13 @@ defmodule AutoMyInvoice.Emails.OverdueEmailTest do
 
     test "includes payment link when present" do
       assigns = build_assigns()
-      assigns = put_in(assigns, [:invoice, :paddle_payment_link], "https://checkout.paddle.com/overdue-test")
+
+      assigns =
+        put_in(
+          assigns,
+          [:invoice, :paddle_payment_link],
+          "https://checkout.paddle.com/overdue-test"
+        )
 
       email = OverdueEmail.build(assigns)
       assert email.html_body =~ "지금 결제하기"

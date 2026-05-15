@@ -21,14 +21,15 @@ defmodule AutoMyInvoice.Emails.ReminderEmail do
         payment_link
       end
 
-    {subject, html, text} = content_for_step(reminder.step, %{
-      client_name: client.name,
-      invoice_number: invoice.invoice_number,
-      amount: amount,
-      due_date: due_date,
-      days_overdue: days_overdue,
-      payment_link: tracked_payment_link
-    })
+    {subject, html, text} =
+      content_for_step(reminder.step, %{
+        client_name: client.name,
+        invoice_number: invoice.invoice_number,
+        amount: amount,
+        due_date: due_date,
+        days_overdue: days_overdue,
+        payment_link: tracked_payment_link
+      })
 
     html = html <> tracking_pixel(base_url, reminder_id)
 

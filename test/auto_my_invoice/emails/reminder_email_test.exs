@@ -62,7 +62,9 @@ defmodule AutoMyInvoice.Emails.ReminderEmailTest do
 
     test "includes Pay Now button when payment link is present" do
       assigns = build_assigns(1)
-      assigns = put_in(assigns, [:invoice, :paddle_payment_link], "https://checkout.paddle.com/test")
+
+      assigns =
+        put_in(assigns, [:invoice, :paddle_payment_link], "https://checkout.paddle.com/test")
 
       email = ReminderEmail.build(assigns)
       assert email.html_body =~ "바로 결제하기"

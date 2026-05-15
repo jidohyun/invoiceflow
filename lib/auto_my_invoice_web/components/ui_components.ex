@@ -4,7 +4,6 @@ defmodule AutoMyInvoiceWeb.UiComponents do
 
   import AutoMyInvoiceWeb.CoreComponents, only: [icon: 1]
 
-
   # 1. stat_card - KPI dashboard card
   attr :title, :string, required: true
   attr :value, :string, required: true
@@ -282,8 +281,7 @@ defmodule AutoMyInvoiceWeb.UiComponents do
       <p class="text-sm text-base-content/60 mt-1">Accepted: {@accepted} (max {@max_size})</p>
       <%= if @upload do %>
         <label class="btn btn-primary btn-sm mt-4 cursor-pointer">
-          Browse Files
-          <.live_file_input upload={@upload} class="hidden" />
+          Browse Files <.live_file_input upload={@upload} class="hidden" />
         </label>
       <% end %>
     </div>

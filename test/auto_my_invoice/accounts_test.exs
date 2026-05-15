@@ -41,7 +41,9 @@ defmodule AutoMyInvoice.AccountsTest do
   describe "get_user_by_email_and_password/2" do
     # A-4: 이메일/비밀번호 로그인 성공
     test "returns user with correct credentials" do
-      {:ok, user} = Accounts.register_user(%{email: "login@example.com", password: "validpassword123"})
+      {:ok, user} =
+        Accounts.register_user(%{email: "login@example.com", password: "validpassword123"})
+
       found = Accounts.get_user_by_email_and_password("login@example.com", "validpassword123")
       assert found.id == user.id
     end
@@ -93,7 +95,8 @@ defmodule AutoMyInvoice.AccountsTest do
   describe "update_profile/2" do
     # A-8: 프로필 업데이트
     test "updates company_name and timezone" do
-      {:ok, user} = Accounts.register_user(%{email: "profile@example.com", password: "validpassword123"})
+      {:ok, user} =
+        Accounts.register_user(%{email: "profile@example.com", password: "validpassword123"})
 
       assert {:ok, updated} =
                Accounts.update_profile(user, %{
@@ -108,7 +111,9 @@ defmodule AutoMyInvoice.AccountsTest do
     end
 
     test "rejects invalid brand_tone" do
-      {:ok, user} = Accounts.register_user(%{email: "tone@example.com", password: "validpassword123"})
+      {:ok, user} =
+        Accounts.register_user(%{email: "tone@example.com", password: "validpassword123"})
+
       assert {:error, changeset} = Accounts.update_profile(user, %{brand_tone: "invalid"})
       assert {"is invalid", _} = changeset.errors[:brand_tone]
     end
@@ -141,7 +146,9 @@ defmodule AutoMyInvoice.AccountsTest do
   describe "session tokens" do
     # A-11, A-12
     test "generates and verifies session token" do
-      {:ok, user} = Accounts.register_user(%{email: "session@example.com", password: "validpassword123"})
+      {:ok, user} =
+        Accounts.register_user(%{email: "session@example.com", password: "validpassword123"})
+
       token = Accounts.generate_user_session_token(user)
       assert is_binary(token)
 
@@ -150,7 +157,9 @@ defmodule AutoMyInvoice.AccountsTest do
     end
 
     test "deletes session token" do
-      {:ok, user} = Accounts.register_user(%{email: "delete@example.com", password: "validpassword123"})
+      {:ok, user} =
+        Accounts.register_user(%{email: "delete@example.com", password: "validpassword123"})
+
       token = Accounts.generate_user_session_token(user)
       assert Accounts.get_user_by_session_token(token) != nil
 

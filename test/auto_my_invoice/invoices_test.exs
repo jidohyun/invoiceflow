@@ -164,6 +164,7 @@ defmodule AutoMyInvoice.InvoicesTest do
       {:ok, invoice} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
 
       assert {:ok, _} = Invoices.delete_invoice(invoice)
+
       assert_raise Ecto.NoResultsError, fn ->
         Invoices.get_invoice!(user.id, invoice.id)
       end
@@ -218,7 +219,12 @@ defmodule AutoMyInvoice.InvoicesTest do
       {:ok, inv1} = Invoices.create_invoice(user, valid_invoice_attrs(client.id))
       {:ok, _sent1} = Invoices.mark_as_sent(inv1)
 
-      {:ok, inv2} = Invoices.create_invoice(user, valid_invoice_attrs(client.id) |> Map.put(:amount, Decimal.new("2000.00")))
+      {:ok, inv2} =
+        Invoices.create_invoice(
+          user,
+          valid_invoice_attrs(client.id) |> Map.put(:amount, Decimal.new("2000.00"))
+        )
+
       {:ok, sent2} = Invoices.mark_as_sent(inv2)
       {:ok, _overdue} = Invoices.mark_as_overdue(sent2)
 
@@ -364,13 +370,17 @@ defmodule AutoMyInvoice.InvoicesTest do
       {:ok, overdue} = Invoices.mark_as_overdue(sent)
 
       overdue
-      |> Ecto.Changeset.change(overdue_notified_at: DateTime.truncate(DateTime.utc_now(), :second))
+      |> Ecto.Changeset.change(
+        overdue_notified_at: DateTime.truncate(DateTime.utc_now(), :second)
+      )
       |> AutoMyInvoice.Repo.update!()
 
       overdue = Invoices.get_invoice!(user.id, overdue.id)
       assert overdue.overdue_notified_at != nil
 
-      assert {:ok, %Invoice{} = updated} = Invoices.record_payment(overdue, %{"amount" => "400.00"})
+      assert {:ok, %Invoice{} = updated} =
+               Invoices.record_payment(overdue, %{"amount" => "400.00"})
+
       assert updated.status == "partially_paid"
       assert is_nil(updated.overdue_notified_at)
     end

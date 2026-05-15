@@ -63,7 +63,11 @@ defmodule AutoMyInvoiceWeb.EmailTrackingControllerTest do
   end
 
   describe "GET /api/track/click/:reminder_id" do
-    test "records click and redirects to payment link", %{conn: conn, reminder: reminder, invoice: invoice} do
+    test "records click and redirects to payment link", %{
+      conn: conn,
+      reminder: reminder,
+      invoice: invoice
+    } do
       # Set payment link on invoice
       invoice
       |> Ecto.Changeset.change(%{paddle_payment_link: "https://checkout.paddle.com/test123"})

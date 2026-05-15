@@ -1,7 +1,6 @@
 defmodule AutoMyInvoiceWeb.UserOauthController do
   use AutoMyInvoiceWeb, :controller
 
-
   def request(conn, _params) do
     conn
     |> put_flash(:error, "Google OAuth is not configured yet. Please use email/password login.")

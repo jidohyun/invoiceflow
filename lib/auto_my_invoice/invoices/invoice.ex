@@ -35,9 +35,15 @@ defmodule AutoMyInvoice.Invoices.Invoice do
 
   @required_fields [:amount, :currency, :due_date, :client_id]
   @optional_fields [
-    :notes, :status, :pdf_url, :original_file_url,
-    :paddle_payment_link, :paid_at, :paid_amount,
-    :sent_at, :overdue_notified_at
+    :notes,
+    :status,
+    :pdf_url,
+    :original_file_url,
+    :paddle_payment_link,
+    :paid_at,
+    :paid_amount,
+    :sent_at,
+    :overdue_notified_at
   ]
 
   def create_changeset(invoice, attrs) do

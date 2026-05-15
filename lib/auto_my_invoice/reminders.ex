@@ -43,8 +43,10 @@ defmodule AutoMyInvoice.Reminders do
 
   @manual_allowed_statuses ~w(sent overdue partially_paid)
 
-  @spec send_manual_reminder(map()) :: {:ok, Reminder.t()} | {:error, :invalid_status | :rate_limited}
-  def send_manual_reminder(%{status: status} = _invoice) when status not in @manual_allowed_statuses do
+  @spec send_manual_reminder(map()) ::
+          {:ok, Reminder.t()} | {:error, :invalid_status | :rate_limited}
+  def send_manual_reminder(%{status: status} = _invoice)
+      when status not in @manual_allowed_statuses do
     {:error, :invalid_status}
   end
 
@@ -188,7 +190,8 @@ defmodule AutoMyInvoice.Reminders do
     alias AutoMyInvoice.Invoices.Invoice
 
     from(r in Reminder,
-      join: i in Invoice, on: r.invoice_id == i.id,
+      join: i in Invoice,
+      on: r.invoice_id == i.id,
       where: i.user_id == ^user_id,
       where: r.status == "sent",
       where: i.status == "paid",
@@ -259,9 +262,15 @@ defmodule AutoMyInvoice.Reminders do
     {:ok, naive} = NaiveDateTime.new(target_date, Time.new!(hour, minute, 0))
 
     case DateTime.from_naive(naive, client_timezone) do
-      {:ok, dt} -> DateTime.shift_zone!(dt, "UTC")
-      {:ambiguous, dt, _} -> DateTime.shift_zone!(dt, "UTC")
-      {:gap, _, dt} -> DateTime.shift_zone!(dt, "UTC")
+      {:ok, dt} ->
+        DateTime.shift_zone!(dt, "UTC")
+
+      {:ambiguous, dt, _} ->
+        DateTime.shift_zone!(dt, "UTC")
+
+      {:gap, _, dt} ->
+        DateTime.shift_zone!(dt, "UTC")
+
       {:error, _} ->
         # Timezone not found, fall back to UTC
         {:ok, dt} = DateTime.from_naive(naive, "UTC")

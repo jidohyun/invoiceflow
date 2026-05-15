@@ -94,7 +94,9 @@ defmodule AutoMyInvoice.Accounts do
   @spec can_create_invoice?(User.t()) :: boolean()
   def can_create_invoice?(%User{plan: plan} = user) do
     case Map.get(@monthly_invoice_limit, plan) do
-      :unlimited -> true
+      :unlimited ->
+        true
+
       limit when is_integer(limit) ->
         count = invoice_count_this_month(user.id)
         count < limit
@@ -120,8 +122,23 @@ defmodule AutoMyInvoice.Accounts do
   def plan_allows?(%User{plan: plan}, feature) do
     plan_features = %{
       "free" => [:invoice_crud, :basic_template],
-      "starter" => [:invoice_crud, :basic_template, :ai_reminders, :paddle_integration, :analytics],
-      "pro" => [:invoice_crud, :basic_template, :ai_reminders, :paddle_integration, :analytics, :team, :custom_branding, :api_access]
+      "starter" => [
+        :invoice_crud,
+        :basic_template,
+        :ai_reminders,
+        :paddle_integration,
+        :analytics
+      ],
+      "pro" => [
+        :invoice_crud,
+        :basic_template,
+        :ai_reminders,
+        :paddle_integration,
+        :analytics,
+        :team,
+        :custom_branding,
+        :api_access
+      ]
     }
 
     feature in Map.get(plan_features, plan, [])

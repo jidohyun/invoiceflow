@@ -46,14 +46,20 @@ defmodule AutoMyInvoice.ExtractionTest do
     end
 
     test "validates file_type inclusion" do
-      changeset = ExtractionJob.changeset(%ExtractionJob{}, %{file_url: "test.txt", file_type: "txt"})
+      changeset =
+        ExtractionJob.changeset(%ExtractionJob{}, %{file_url: "test.txt", file_type: "txt"})
+
       assert errors_on(changeset).file_type != []
     end
 
     test "validates confidence_score range" do
-      changeset = ExtractionJob.changeset(%ExtractionJob{}, %{
-        file_url: "test.pdf", file_type: "pdf", confidence_score: 1.5
-      })
+      changeset =
+        ExtractionJob.changeset(%ExtractionJob{}, %{
+          file_url: "test.pdf",
+          file_type: "pdf",
+          confidence_score: 1.5
+        })
+
       assert errors_on(changeset).confidence_score != []
     end
   end
@@ -166,9 +172,13 @@ defmodule AutoMyInvoice.ExtractionTest do
     # E-8: 기존 클라이언트 매칭
     test "returns existing client when email matches" do
       user = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{
-        name: "Acme", email: "billing@acme.com", company: "Acme Corp"
-      })
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{
+          name: "Acme",
+          email: "billing@acme.com",
+          company: "Acme Corp"
+        })
 
       extracted = %{"client_email" => "billing@acme.com", "client_name" => "Acme"}
       assert {:existing, found} = Extraction.find_or_suggest_client(user.id, extracted)

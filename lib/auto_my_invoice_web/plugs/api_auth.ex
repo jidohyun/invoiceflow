@@ -5,7 +5,8 @@ defmodule AutoMyInvoiceWeb.Plugs.ApiAuth do
 
   alias AutoMyInvoice.Accounts
 
-  @max_age 86_400 * 30  # 30 days
+  # 30 days
+  @max_age 86_400 * 30
 
   def init(opts), do: opts
 
@@ -20,7 +21,9 @@ defmodule AutoMyInvoiceWeb.Plugs.ApiAuth do
       _ ->
         conn
         |> put_status(:unauthorized)
-        |> Phoenix.Controller.json(%{error: %{code: "unauthorized", message: "Invalid or missing token"}})
+        |> Phoenix.Controller.json(%{
+          error: %{code: "unauthorized", message: "Invalid or missing token"}
+        })
         |> halt()
     end
   end

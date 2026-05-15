@@ -82,6 +82,10 @@ defmodule AutoMyInvoice.Billing.PaddleClient do
   end
 
   defp checkout_return_url do
-    Application.get_env(:auto_my_invoice, :paddle_checkout_return_url, "https://automyinvoice.app/payment/success")
+    Application.get_env(
+      :auto_my_invoice,
+      :paddle_checkout_return_url,
+      "https://automyinvoice.app/payment/success"
+    )
   end
 end

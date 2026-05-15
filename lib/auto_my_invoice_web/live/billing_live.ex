@@ -58,8 +58,7 @@ defmodule AutoMyInvoiceWeb.BillingLive do
             </div>
           <% else %>
             <p class="text-sm text-success mt-4 flex items-center">
-              <span class="material-icons text-sm mr-1">all_inclusive</span>
-              무제한 송장
+              <span class="material-icons text-sm mr-1">all_inclusive</span> 무제한 송장
             </p>
           <% end %>
         </div>
@@ -67,7 +66,10 @@ defmodule AutoMyInvoiceWeb.BillingLive do
 
       <%!-- Plans --%>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div :for={{plan_id, plan} <- @plans} class={"card bg-base-100 shadow #{if @usage.plan == plan_id, do: "ring-2 ring-primary"}"}>
+        <div
+          :for={{plan_id, plan} <- @plans}
+          class={"card bg-base-100 shadow #{if @usage.plan == plan_id, do: "ring-2 ring-primary"}"}
+        >
           <div class="card-body">
             <h3 class="card-title">{plan.name}</h3>
             <p class="text-3xl font-bold mt-2">
@@ -79,16 +81,13 @@ defmodule AutoMyInvoiceWeb.BillingLive do
                 월 {format_limit(plan.monthly_invoices)} 송장
               </li>
               <li :if={plan_id != "free"} class="flex items-center gap-2">
-                <span class="material-icons text-success text-sm">check</span>
-                AI 리마인더
+                <span class="material-icons text-success text-sm">check</span> AI 리마인더
               </li>
               <li :if={plan_id != "free"} class="flex items-center gap-2">
-                <span class="material-icons text-success text-sm">check</span>
-                결제 연동
+                <span class="material-icons text-success text-sm">check</span> 결제 연동
               </li>
               <li :if={plan_id == "pro"} class="flex items-center gap-2">
-                <span class="material-icons text-success text-sm">check</span>
-                팀 및 API 이용
+                <span class="material-icons text-success text-sm">check</span> 팀 및 API 이용
               </li>
             </ul>
             <div class="card-actions mt-4">
@@ -103,7 +102,9 @@ defmodule AutoMyInvoiceWeb.BillingLive do
                     phx-click="upgrade"
                     phx-value-plan={plan_id}
                   >
-                    {plan.name} 플랜으로 {if plan.price > (@plans[@usage.plan] || %{price: 0}).price, do: "업그레이드", else: "변경"}
+                    {plan.name} 플랜으로 {if plan.price > (@plans[@usage.plan] || %{price: 0}).price,
+                      do: "업그레이드",
+                      else: "변경"}
                   </button>
               <% end %>
             </div>
@@ -126,7 +127,9 @@ defmodule AutoMyInvoiceWeb.BillingLive do
             </div>
             <div :if={@subscription.current_period_end}>
               <span class="text-base-content/60">다음 결제일</span>
-              <p class="font-medium">{Calendar.strftime(@subscription.current_period_end, "%Y년 %m월 %d일")}</p>
+              <p class="font-medium">
+                {Calendar.strftime(@subscription.current_period_end, "%Y년 %m월 %d일")}
+              </p>
             </div>
           </div>
         </div>

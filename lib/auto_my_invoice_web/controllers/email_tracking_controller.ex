@@ -3,9 +3,7 @@ defmodule AutoMyInvoiceWeb.EmailTrackingController do
 
   alias AutoMyInvoice.Reminders
 
-  @transparent_pixel Base.decode64!(
-                       "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                     )
+  @transparent_pixel Base.decode64!("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
 
   @doc """
   GET /api/track/open/:reminder_id

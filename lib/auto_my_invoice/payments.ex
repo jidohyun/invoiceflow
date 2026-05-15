@@ -75,7 +75,9 @@ defmodule AutoMyInvoice.Payments do
   @spec mark_event_processed(PaddleWebhookEvent.t()) :: {:ok, PaddleWebhookEvent.t()}
   def mark_event_processed(event) do
     event
-    |> PaddleWebhookEvent.changeset(%{processed_at: DateTime.truncate(DateTime.utc_now(), :second)})
+    |> PaddleWebhookEvent.changeset(%{
+      processed_at: DateTime.truncate(DateTime.utc_now(), :second)
+    })
     |> Repo.update()
   end
 

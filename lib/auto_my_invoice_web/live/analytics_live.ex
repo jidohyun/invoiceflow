@@ -175,7 +175,8 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
       datasets: [
         %{
           data: Enum.map(status_dist, & &1.count),
-          backgroundColor: Enum.map(status_dist, &Map.get(colors, &1.status, "rgba(156, 163, 175, 0.7)"))
+          backgroundColor:
+            Enum.map(status_dist, &Map.get(colors, &1.status, "rgba(156, 163, 175, 0.7)"))
         }
       ]
     }
@@ -183,6 +184,7 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
 
   defp build_aging_chart_data(aging) do
     buckets = ["0-30", "31-60", "61-90", "90+"]
+
     colors = [
       "rgba(34, 197, 94, 0.7)",
       "rgba(245, 158, 11, 0.7)",
@@ -195,9 +197,13 @@ defmodule AutoMyInvoiceWeb.AnalyticsLive do
       datasets: [
         %{
           label: "미수금",
-          data: Enum.map(buckets, fn bucket ->
-            aging |> Map.get(bucket, %{total: Decimal.new(0)}) |> Map.get(:total) |> Decimal.to_float()
-          end),
+          data:
+            Enum.map(buckets, fn bucket ->
+              aging
+              |> Map.get(bucket, %{total: Decimal.new(0)})
+              |> Map.get(:total)
+              |> Decimal.to_float()
+            end),
           backgroundColor: colors,
           borderWidth: 1
         }

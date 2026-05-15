@@ -7,7 +7,10 @@ defmodule AutoMyInvoice.ClientsTest do
 
   defp create_user(_context \\ %{}) do
     {:ok, user} =
-      Accounts.register_user(%{email: "client-test-#{System.unique_integer([:positive])}@example.com", password: "validpassword123"})
+      Accounts.register_user(%{
+        email: "client-test-#{System.unique_integer([:positive])}@example.com",
+        password: "validpassword123"
+      })
 
     %{user: user}
   end
@@ -40,8 +43,14 @@ defmodule AutoMyInvoice.ClientsTest do
 
       attrs = %{name: "John", email: "dupe@example.com"}
       assert {:ok, _} = Clients.create_client(user.id, attrs)
-      assert {:error, changeset} = Clients.create_client(user.id, %{name: "Jane", email: "dupe@example.com"})
-      assert {msg, _} = changeset.errors[:user_id] || changeset.errors[:email] || changeset.errors[:user_id_email]
+
+      assert {:error, changeset} =
+               Clients.create_client(user.id, %{name: "Jane", email: "dupe@example.com"})
+
+      assert {msg, _} =
+               changeset.errors[:user_id] || changeset.errors[:email] ||
+                 changeset.errors[:user_id_email]
+
       assert msg == "이미 등록된 클라이언트 이메일입니다"
     end
 
@@ -52,7 +61,9 @@ defmodule AutoMyInvoice.ClientsTest do
 
       attrs = %{name: "John", email: "shared@example.com"}
       assert {:ok, _} = Clients.create_client(user1.id, attrs)
-      assert {:ok, _} = Clients.create_client(user2.id, %{name: "Jane", email: "shared@example.com"})
+
+      assert {:ok, _} =
+               Clients.create_client(user2.id, %{name: "Jane", email: "shared@example.com"})
     end
   end
 
@@ -60,9 +71,13 @@ defmodule AutoMyInvoice.ClientsTest do
     # C-5: 클라이언트 수정
     test "updates client fields" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "Old Name", email: "update@example.com"})
 
-      assert {:ok, updated} = Clients.update_client(client, %{name: "New Name", company: "New Corp"})
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "Old Name", email: "update@example.com"})
+
+      assert {:ok, updated} =
+               Clients.update_client(client, %{name: "New Name", company: "New Corp"})
+
       assert updated.name == "New Name"
       assert updated.company == "New Corp"
     end
@@ -72,7 +87,9 @@ defmodule AutoMyInvoice.ClientsTest do
     # C-6: 클라이언트 삭제
     test "deletes client" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "Delete Me", email: "delete@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "Delete Me", email: "delete@example.com"})
 
       assert {:ok, _} = Clients.delete_client(client)
       assert_raise Ecto.NoResultsError, fn -> Clients.get_client!(user.id, client.id) end
@@ -83,7 +100,10 @@ defmodule AutoMyInvoice.ClientsTest do
     # C-7: 목록 검색 (이름)
     test "searches by name" do
       %{user: user} = create_user()
-      {:ok, _} = Clients.create_client(user.id, %{name: "Alice Smith", email: "alice@example.com"})
+
+      {:ok, _} =
+        Clients.create_client(user.id, %{name: "Alice Smith", email: "alice@example.com"})
+
       {:ok, _} = Clients.create_client(user.id, %{name: "Bob Jones", email: "bob@example.com"})
 
       results = Clients.list_clients(user.id, search: "Alice")
@@ -147,7 +167,9 @@ defmodule AutoMyInvoice.ClientsTest do
 
     test "calculates total_invoiced and total_paid" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "Stats Client", email: "stats@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "Stats Client", email: "stats@example.com"})
 
       create_invoice!(user, client, %{
         amount: Decimal.new("1000"),
@@ -179,7 +201,9 @@ defmodule AutoMyInvoice.ClientsTest do
 
     test "calculates avg_payment_days for paid invoices" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "Avg Client", email: "avg@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "Avg Client", email: "avg@example.com"})
 
       # Paid in 4 days
       create_invoice!(user, client, %{
@@ -207,7 +231,9 @@ defmodule AutoMyInvoice.ClientsTest do
 
     test "handles client with no invoices" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "Empty Client", email: "empty@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "Empty Client", email: "empty@example.com"})
 
       {:ok, updated} = Clients.recalculate_stats(client.id)
 
@@ -220,7 +246,9 @@ defmodule AutoMyInvoice.ClientsTest do
   describe "on_time_rate/1" do
     test "calculates percentage of on-time payments" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "OnTime Client", email: "ontime@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "OnTime Client", email: "ontime@example.com"})
 
       # Paid on time (within due_date + 3 days)
       create_invoice!(user, client, %{
@@ -259,7 +287,9 @@ defmodule AutoMyInvoice.ClientsTest do
 
     test "returns 0 for client with no paid invoices" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "NoPaid Client", email: "nopaid@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "NoPaid Client", email: "nopaid@example.com"})
 
       assert Clients.on_time_rate(client.id) == 0.0
     end
@@ -268,8 +298,12 @@ defmodule AutoMyInvoice.ClientsTest do
   describe "client_ranking/1" do
     test "returns clients ordered by avg_payment_days" do
       %{user: user} = create_user()
-      {:ok, fast_client} = Clients.create_client(user.id, %{name: "Fast Payer", email: "fast@example.com"})
-      {:ok, slow_client} = Clients.create_client(user.id, %{name: "Slow Payer", email: "slow@example.com"})
+
+      {:ok, fast_client} =
+        Clients.create_client(user.id, %{name: "Fast Payer", email: "fast@example.com"})
+
+      {:ok, slow_client} =
+        Clients.create_client(user.id, %{name: "Slow Payer", email: "slow@example.com"})
 
       # Fast client: 2 paid invoices, ~2 days each
       for _ <- 1..2 do
@@ -303,7 +337,9 @@ defmodule AutoMyInvoice.ClientsTest do
 
     test "excludes clients with fewer than 2 paid invoices" do
       %{user: user} = create_user()
-      {:ok, one_invoice_client} = Clients.create_client(user.id, %{name: "One Invoice", email: "one@example.com"})
+
+      {:ok, one_invoice_client} =
+        Clients.create_client(user.id, %{name: "One Invoice", email: "one@example.com"})
 
       create_invoice!(user, one_invoice_client, %{
         amount: Decimal.new("1000"),
@@ -321,7 +357,9 @@ defmodule AutoMyInvoice.ClientsTest do
   describe "client_analytics/1" do
     test "returns complete analytics for a client" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "Analytics Client", email: "analytics@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "Analytics Client", email: "analytics@example.com"})
 
       # Paid invoice
       create_invoice!(user, client, %{
@@ -356,7 +394,9 @@ defmodule AutoMyInvoice.ClientsTest do
   describe "get_client_by_email/2" do
     test "finds client by user_id and email" do
       %{user: user} = create_user()
-      {:ok, client} = Clients.create_client(user.id, %{name: "Find Me", email: "find@example.com"})
+
+      {:ok, client} =
+        Clients.create_client(user.id, %{name: "Find Me", email: "find@example.com"})
 
       found = Clients.get_client_by_email(user.id, "find@example.com")
       assert found.id == client.id

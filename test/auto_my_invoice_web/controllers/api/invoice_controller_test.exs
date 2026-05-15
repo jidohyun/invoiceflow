@@ -48,7 +48,12 @@ defmodule AutoMyInvoiceWeb.Api.InvoiceControllerTest do
           "currency" => "USD",
           "due_date" => Date.to_iso8601(Date.add(Date.utc_today(), 30)),
           "items" => [
-            %{"description" => "Web Development", "quantity" => "10", "unit_price" => "100.00", "position" => 0}
+            %{
+              "description" => "Web Development",
+              "quantity" => "10",
+              "unit_price" => "100.00",
+              "position" => 0
+            }
           ]
         }
       }
@@ -150,7 +155,11 @@ defmodule AutoMyInvoiceWeb.Api.InvoiceControllerTest do
     end
 
     test "returns 404 for non-existent invoice", %{conn: conn} do
-      conn = post(conn, "/api/v1/invoices/#{Ecto.UUID.generate()}/record_payment", %{"amount" => "100.00"})
+      conn =
+        post(conn, "/api/v1/invoices/#{Ecto.UUID.generate()}/record_payment", %{
+          "amount" => "100.00"
+        })
+
       assert json_response(conn, 404)
     end
   end
@@ -163,7 +172,13 @@ defmodule AutoMyInvoiceWeb.Api.InvoiceControllerTest do
           amount: Decimal.new("1000"),
           currency: "USD",
           due_date: Date.add(Date.utc_today(), 30),
-          items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+          items: [
+            %{
+              description: "Service",
+              quantity: Decimal.new(1),
+              unit_price: Decimal.new("1000.00")
+            }
+          ]
         })
 
       {:ok, sent} = Invoices.mark_as_sent(invoice)
@@ -180,7 +195,13 @@ defmodule AutoMyInvoiceWeb.Api.InvoiceControllerTest do
           amount: Decimal.new("1000"),
           currency: "USD",
           due_date: Date.add(Date.utc_today(), 30),
-          items: [%{description: "Service", quantity: Decimal.new(1), unit_price: Decimal.new("1000.00")}]
+          items: [
+            %{
+              description: "Service",
+              quantity: Decimal.new(1),
+              unit_price: Decimal.new("1000.00")
+            }
+          ]
         })
 
       conn = post(conn, "/api/v1/invoices/#{invoice.id}/send_reminder")

@@ -127,7 +127,8 @@ defmodule AutoMyInvoice.Analytics do
       from(i in Invoice,
         where: i.user_id == ^user_id,
         where: i.status in ~w(sent overdue partially_paid),
-        join: c in Client, on: c.id == i.client_id,
+        join: c in Client,
+        on: c.id == i.client_id,
         select: %{
           amount: i.amount,
           paid_amount: i.paid_amount,

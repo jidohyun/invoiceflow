@@ -174,18 +174,29 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
           <.inputs_for :let={item_form} field={@form[:items]}>
             <div class="flex gap-2 items-end">
               <div class="flex-1">
-                <.input field={item_form[:description]} type="text" label="품목명" placeholder="품목명을 입력하세요" />
+                <.input
+                  field={item_form[:description]}
+                  type="text"
+                  label="품목명"
+                  placeholder="품목명을 입력하세요"
+                />
               </div>
               <div class="w-20">
                 <.input field={item_form[:quantity]} type="number" label="수량" step="0.01" min="0" />
               </div>
               <div class="w-28">
-                <.input field={item_form[:unit_price]} type="number" label="단가" step="0.01" min="0" />
+                <.input
+                  field={item_form[:unit_price]}
+                  type="number"
+                  label="단가"
+                  step="0.01"
+                  min="0"
+                />
               </div>
               <div class="w-10 pb-2">
                 <button
                   type="button"
-                  name={"invoice[items_drop][]"}
+                  name="invoice[items_drop][]"
                   value={item_form.index}
                   class="btn btn-ghost btn-sm btn-circle"
                   phx-click={JS.dispatch("change")}

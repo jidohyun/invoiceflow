@@ -23,8 +23,15 @@ defmodule AutoMyInvoice.Billing.Subscription do
 
   def changeset(subscription, attrs) do
     subscription
-    |> cast(attrs, [:paddle_subscription_id, :paddle_customer_id, :plan,
-                     :status, :current_period_start, :current_period_end, :cancelled_at])
+    |> cast(attrs, [
+      :paddle_subscription_id,
+      :paddle_customer_id,
+      :plan,
+      :status,
+      :current_period_start,
+      :current_period_end,
+      :cancelled_at
+    ])
     |> validate_required([:paddle_subscription_id, :plan, :status])
     |> validate_inclusion(:plan, ~w(starter pro))
     |> validate_inclusion(:status, @statuses)
