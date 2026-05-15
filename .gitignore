@@ -65,3 +65,5 @@ npm-debug.log
 
 # Scratch / duplicate directory (slated for cleanup in AMI-58)
 /invoice_flow/
+.gstack/
+.playwright-mcp/
