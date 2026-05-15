@@ -135,6 +135,7 @@ defmodule AutoMyInvoiceWeb.UserSettingsLive do
 
     socket =
       socket
+      |> assign(:page_title, "설정")
       |> assign(timezones: @timezones, brand_tones: @brand_tones)
       |> assign_form(changeset)
 
