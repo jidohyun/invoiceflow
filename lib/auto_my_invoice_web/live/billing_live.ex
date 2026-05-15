@@ -14,7 +14,8 @@ defmodule AutoMyInvoiceWeb.BillingLive do
      |> assign(:page_title, "결제")
      |> assign(:usage, usage)
      |> assign(:subscription, subscription)
-     |> assign(:plans, Billing.plans())}
+     |> assign(:plans, Billing.plans())
+     |> assign(:ordered_plans, Billing.plans_ordered())}
   end
 
   @impl true
@@ -67,7 +68,7 @@ defmodule AutoMyInvoiceWeb.BillingLive do
       <%!-- Plans --%>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div
-          :for={{plan_id, plan} <- @plans}
+          :for={{plan_id, plan} <- @ordered_plans}
           class={"card bg-base-100 shadow #{if @usage.plan == plan_id, do: "ring-2 ring-primary"}"}
         >
           <div class="card-body">

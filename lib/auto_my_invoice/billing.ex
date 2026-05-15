@@ -102,6 +102,12 @@ defmodule AutoMyInvoice.Billing do
   @spec plans() :: map()
   def plans, do: @plans
 
+  @spec plans_ordered() :: [{String.t(), map()}]
+  def plans_ordered do
+    @plans
+    |> Enum.sort_by(fn {_id, plan} -> plan.price end)
+  end
+
   @spec plan_info(String.t()) :: map()
   def plan_info(plan), do: Map.get(@plans, plan, @plans["free"])
 
