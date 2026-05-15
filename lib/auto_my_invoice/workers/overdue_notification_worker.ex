@@ -28,7 +28,7 @@ defmodule AutoMyInvoice.Workers.OverdueNotificationWorker do
   end
 
   defp maybe_preload(nil), do: nil
-  defp maybe_preload(invoice), do: Repo.preload(invoice, :client)
+  defp maybe_preload(invoice), do: Repo.preload(invoice, [:client, :user])
 
   defp validate_invoice(nil), do: {:cancel, "invoice not found"}
   defp validate_invoice(%{overdue_notified_at: notified_at}) when not is_nil(notified_at), do: :ok
@@ -56,7 +56,8 @@ defmodule AutoMyInvoice.Workers.OverdueNotificationWorker do
       OverdueEmail.build(%{
         invoice: invoice,
         client: client,
-        from_email: from_email
+        from_email: from_email,
+        user: Map.get(invoice, :user)
       })
 
     case Mailer.deliver(email) do

@@ -15,6 +15,7 @@ defmodule AutoMyInvoice.Accounts.User do
     field :company_name, :string
     field :timezone, :string, default: "Asia/Seoul"
     field :brand_tone, :string, default: "professional"
+    field :brand_color, :string
 
     # OAuth
     field :google_uid, :string
@@ -31,6 +32,7 @@ defmodule AutoMyInvoice.Accounts.User do
     :company_name,
     :timezone,
     :brand_tone,
+    :brand_color,
     :google_uid,
     :avatar_url,
     :plan,
@@ -56,6 +58,9 @@ defmodule AutoMyInvoice.Accounts.User do
     |> cast(attrs, @optional_fields)
     |> validate_inclusion(:brand_tone, ~w(professional friendly formal))
     |> validate_inclusion(:plan, ~w(free starter pro))
+    |> validate_format(:brand_color, ~r/^#[0-9A-Fa-f]{6}$/,
+      message: "must be a hex color like #RRGGBB"
+    )
   end
 
   def valid_password?(%__MODULE__{hashed_password: hashed_password}, password)

@@ -68,5 +68,16 @@ defmodule AutoMyInvoice.Emails.OverdueEmailTest do
       email = OverdueEmail.build(build_assigns())
       refute email.html_body =~ "지금 결제하기"
     end
+
+    test "uses user.company_name as from name and applies brand_color to header" do
+      assigns =
+        build_assigns()
+        |> Map.put(:user, %{company_name: "코끼리상사", brand_color: "#ff5722"})
+
+      email = OverdueEmail.build(assigns)
+
+      assert {"코끼리상사", "noreply@automyinvoice.app"} = email.from
+      assert email.html_body =~ "#ff5722"
+    end
   end
 end

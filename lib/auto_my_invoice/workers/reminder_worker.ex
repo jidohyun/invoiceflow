@@ -20,7 +20,7 @@ defmodule AutoMyInvoice.Workers.ReminderWorker do
     reminder =
       Reminder
       |> Repo.get(reminder_id)
-      |> Repo.preload(invoice: :client)
+      |> Repo.preload(invoice: [:client, :user])
 
     case reminder do
       nil ->
@@ -50,7 +50,8 @@ defmodule AutoMyInvoice.Workers.ReminderWorker do
         reminder: reminder_with_tracking,
         invoice: invoice,
         client: client,
-        from_email: from_email
+        from_email: from_email,
+        user: invoice.user
       })
 
     case Mailer.deliver(email) do
