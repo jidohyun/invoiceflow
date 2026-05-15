@@ -2,7 +2,7 @@
 
 > **목적**: 컨텍스트가 초기화된 에이전트가 이 문서 하나만 읽고 즉시 다음 작업을 시작할 수 있도록 현재까지의 진행 상황과 다음 액션을 정리합니다.
 >
-> **마지막 갱신**: 2026-05-15
+> **마지막 갱신**: 2026-05-15 (Sprint 3 중간 — AMI-84/86 완료)
 
 ---
 
@@ -23,7 +23,7 @@ AutoMyInvoice (AMI) — **Elixir/Phoenix LiveView 기반 자동 송장 리마인
 |---|---|---|---|---|
 | Sprint 1 - 출시 기반 & 안정화 | 68 | 2026-04-01 ~ 04-14 | ✅ **closed** | 16/16 (100%) |
 | Sprint 2 - 핵심 경험 완성 | 69 | 2026-04-15 ~ 04-28 | ✅ **closed** | 4/4 (100%) |
-| Sprint 3 - 분석 & AI | 70 | 2026-04-29 ~ 05-12 | 🟢 **active** | 0/4 (착수 전) |
+| Sprint 3 - 분석 & AI | 70 | 2026-04-29 ~ 05-12 | 🟢 **active** | 2/4 (50%) |
 | Sprint 4 - 모바일 & Pro 확장 | 103 | 미정 | ⏸️ future | 0/4 |
 
 ### Sprint 1 완료 항목 (참고용)
@@ -37,14 +37,21 @@ AutoMyInvoice (AMI) — **Elixir/Phoenix LiveView 기반 자동 송장 리마인
 - AMI-82 클라이언트 결제 패턴 분석
 - AMI-83 리마인더 효과 분석
 
-### Sprint 3 — **지금 작업해야 하는 4건** ⬇️
+### Sprint 3 — **현재 진행 중** ⬇️
 
-| Key | 제목 | 상태 |
+| Key | 제목 | 상태 | PR |
+|---|---|---|---|
+| **AMI-84** | 영수증 촬영 → AI 자동 송장 생성 | ✅ **완료** (코드 머지 — Jira 전환 잔여) | #8 → main `a7e7c33` |
+| **AMI-85** | 다중 영수증 배치 처리 | ⏳ 해야 할 일 |  |
+| **AMI-86** | 내 브랜드로 이메일 커스터마이징 | ✅ **백엔드 완료** (Settings UI 별도) | #10 → main `148d716` |
+| **AMI-87** | 비밀번호 없이 로그인 & 계정 복구 | ⏳ 해야 할 일 |  |
+
+#### Sprint 3 인프라/부채 PR (스토리 외)
+| PR | 머지 커밋 | 내용 |
 |---|---|---|
-| **AMI-84** | 영수증 촬영 → AI 자동 송장 생성 | 해야 할 일 |
-| **AMI-85** | 다중 영수증 배치 처리 | 해야 할 일 |
-| **AMI-86** | 내 브랜드로 이메일 커스터마이징 | 해야 할 일 |
-| **AMI-87** | 비밀번호 없이 로그인 & 계정 복구 | 해야 할 일 |
+| #7 | `a628b73` | docker-compose dev 환경 (host port 15433, Elixir 1.19.5/OTP 27 image) |
+| #9 | `3184c8b` | CI Elixir/OTP 1.15/26 → 1.19.5/27.2, prod Dockerfile 동일 bump, `Date.shift/2` 회귀 해소, ChromicPDF chromium step 추가 |
+
 
 스프린트 목표: **대시보드 분석 차트, OCR 강화, 이메일 커스터마이징**
 
@@ -56,31 +63,29 @@ AutoMyInvoice (AMI) — **Elixir/Phoenix LiveView 기반 자동 송장 리마인
 
 ---
 
-## 3. 작업 디렉토리 현재 상태 ⚠️
+## 3. 작업 디렉토리 현재 상태
 
-**커밋되지 않은 변경사항이 다수 존재합니다.** 작업 시작 전에 반드시 정리하세요.
+### Clean working tree
+미커밋 변경 없음. `main` 과 `origin/main` 동기화 완료.
 
-### 미커밋 modified (33개 파일)
-주로 LiveView 페이지 (`lib/auto_my_invoice_web/live/*`), 이메일 템플릿, 컴포넌트, 컨트롤러. Sprint 1~2 작업의 잔여 변경으로 추정.
-
-### 미커밋 untracked (주요)
-- `docs/PROJECT_PLAN.md`, `docs/QA_REPORT_2026-03-11.md`, `docs/sprint_reports/` (1~2차 스프린트 보고서 8건)
-- `invoice_flow/` (중복 디렉토리 — 백로그 AMI-58 정리 대상)
-- `priv/repo/migrations/20260414000001_change_invoices_currency_default_to_krw.exs`
-- `priv/static/uploads/test-*.png` (52개 테스트 업로드 이미지 — `.gitignore` 추가 권장)
-
-### 원격 동기화
+### 최근 커밋 (2026-05-15 기준)
 ```
-Your branch is behind 'origin/main' by 1 commit, and can be fast-forwarded.
+148d716 feat(AMI-86): brand-aware emails (company_name + brand_color) (#10)
+3184c8b fix(ci): bump Elixir/OTP to 1.19.5/27.2 to unblock Server CI (#9)
+a7e7c33 fix: production-ready AMI-84 receipt-to-invoice extraction (#8)
+a628b73 chore: add docker compose dev environment (#7)
+a0538a0 style: apply mix format across codebase
 ```
-→ **시작 전 `git pull --ff-only` 필요**
 
-### 최근 커밋
-```
-f295c45 feat: complete Sprint 2 analytics dashboard with demo data
-2d25e63 feat: complete Sprint 1 collection flow
-431da7f chore: add gstack skill routing rules to CLAUDE.md
-```
+### 테스트 / CI
+- `mix test` (Docker, Elixir 1.19.5/OTP 27): **287 tests, 0 failures**
+- Server CI (GitHub Actions): 🟢 **green** (Sprint 3 hotfix 이후 회복)
+
+### 환경
+- **Docker-only**: 호스트에 native Elixir/Mix/Postgres 없음. `make docker.test`, `make docker.precommit`, `make docker.server` 사용.
+- **Postgres**: host port `15433` (15432 는 fishing-pond 사용 중)
+- **Compose**: `docker-compose.yml` + `Dockerfile.dev` (Elixir 1.19.5 / OTP 27.2.4)
+- **CI**: `.github/workflows/server.yml` (chromium 설치, credo 정보용)
 
 ---
 
@@ -88,35 +93,33 @@ f295c45 feat: complete Sprint 2 analytics dashboard with demo data
 
 ### Step 0: 환경 동기화
 ```bash
+cd ~/auto-my-invoice
 git pull --ff-only origin main
-mix deps.get
-make precommit  # compile + format + test, 통과 확인
+make docker.test  # 287/0 통과 확인
 ```
 
-### Step 1: 미커밋 변경사항 처리 결정
-사용자에게 확인 후 둘 중 선택:
-1. **(권장)** 33개 modified를 의미 단위로 쪼개 커밋. `git diff` 검토 → `feat:`/`fix:`/`refactor:` 타입별 분리.
-2. 변경사항이 Sprint 1~2 잔재라면 단일 `chore: cleanup post-sprint-2 leftovers` 커밋.
+### Step 1: 진행할 Sprint 3 잔여 작업 선택
+권장 순서:
+1. **(가장 작음) AMI-86 Settings UI** — 백엔드는 머지 완료. `/settings` LiveView 에 `company_name` 입력 + `brand_color` color picker 추가. `User.profile_changeset/2` 가 이미 `brand_color` 받음. 별도 PR.
+2. **AMI-85 다중 영수증 배치** — Oban fan-out 패턴. LiveView 업로드 다중화, ExtractionJob N건 fan-out, 진행 상황 PubSub.
+3. **AMI-87 매직링크** — `Accounts` 컨텍스트 확장. 토큰 테이블 + 이메일 송신. 보안 영향 큼.
 
-`priv/static/uploads/test-*.png`는 `.gitignore`에 추가하고 커밋 대상에서 제외할 것.
+### Step 2: 미해결 운영 이슈 (작업 전에 확인)
+- **Jira AMI-84 / AMI-86 → "완료" 전환 잔여**: 이번 세션에서 Atlassian MCP 가 3연속 실패 후 unreachable. 새 세션에서 회복 시 한 번에 두 건 transition. PR 본문에 `Closes AMI-XX` 포함되어 있어 GitHub-Jira 연동이 살아있으면 자동 전환됐을 가능성도 있음 — 먼저 Jira 대시보드 확인.
+- **`mix credo --strict` 차단 해제**: 사전 부채(W1/R9/RD2/D3, ~57건) 때문에 CI 에서 `continue-on-error: true` 로 격리. 자세한 cleanup 계획은 [`docs/CREDO_CLEANUP_EPIC.md`](./CREDO_CLEANUP_EPIC.md) 참고.
+- **Node20 deprecation**: GitHub Actions 가 2026-06-02 부터 Node24 로 강제. `actions/cache@v4`, `actions/checkout@v4` 새 버전 확인.
 
-### Step 2: Sprint 3 첫 작업 — AMI-84 추천
-**영수증 촬영 → AI 자동 송장 생성**이 다른 3건의 전제(OCR 파이프라인이 86 이메일 브랜딩과 87 매직링크보다 의존성 적음, 85 배치는 84의 단일처리 위에 얹는 구조).
-
-작업 시작 시:
+### Step 3: 작업 시작 시 공통
 ```bash
-git checkout -b feat/ami-84-receipt-to-invoice
+git checkout -b feat/ami-XX-<slug>
+# (옵션) .hermes/seeds/AMI-XX.md 에 bounded seed 작성
+make docker.test  # baseline 확보
+# TDD: RED → GREEN → REFACTOR
+make docker.precommit
+gh pr create --base main --head feat/ami-XX-<slug>
 ```
 
-Jira 트랜지션:
-- 상태를 `진행 중`으로 이동 (`mcp__jira__jira_transition_issue` 사용)
-- 작업 완료 시 `완료`로 이동, PR에 `AMI-84` 키 포함
-
-### Step 3: Sprint 3 작업 순서 권장
-1. **AMI-84** OCR 단건 (Claude Vision 파이프라인은 1차 스프린트에서 95% 정확도 달성. `lib/auto_my_invoice/extraction.ex` 확장)
-2. **AMI-85** 다중 배치 (Oban fan-out 패턴)
-3. **AMI-86** 이메일 브랜딩 (사용자별 로고/색상, `emails/*.ex` 템플릿화)
-4. **AMI-87** 매직링크 로그인 + 비밀번호 재설정 플로우 (`Accounts` 컨텍스트 확장)
+PR 본문에 `Closes AMI-XX` 포함 (Jira 자동 전환). 커밋 메시지는 Lore format + `Co-Authored-By: Claude Opus 4.7`.
 
 ---
 
@@ -137,7 +140,7 @@ lib/auto_my_invoice_web/
 apps/android/                # Kotlin + Compose + Hilt + MVI
 apps/ios/                    # Swift + SwiftUI + Factory + MVI
 packages/api-spec/openapi.yaml  # API 변경 시 반드시 동시 업데이트
-test/                        # ExUnit (133+ 테스트 통과 유지)
+test/                        # ExUnit (287+ 테스트 통과 유지)
 docs/sprint_reports/         # 스프린트 보고서 1~2차 (참고 자료)
 ```
 
