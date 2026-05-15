@@ -6,6 +6,10 @@ node_modules
 .git
 .omc
 .claude
+.hermes
+.env
+.env.*
+!.env.example
 priv/static/uploads/*
 !priv/static/uploads/.gitkeep
 tmp

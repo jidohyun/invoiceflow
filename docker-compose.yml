@@ -1,0 +1,53 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    user: "${UID:-1000}:${GID:-1000}"
+    volumes:
+      - .:/app
+      - deps_data:/app/deps
+      - build_data:/app/_build
+      - mix_data:/home/dev/.mix
+      - hex_data:/home/dev/.hex
+    environment:
+      HOME: /home/dev
+      MIX_HOME: /home/dev/.mix
+      HEX_HOME: /home/dev/.hex
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-auto_my_invoice_dev}
+      TEST_POSTGRES_DB: ${TEST_POSTGRES_DB:-auto_my_invoice_test}
+      PHX_HOST_BIND: ${PHX_HOST_BIND:-0.0.0.0}
+      PORT: ${PHX_PORT:-4000}
+    ports:
+      - "${PHX_PORT:-4000}:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-auto_my_invoice_dev}
+    ports:
+      - "${POSTGRES_PORT:-15432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  deps_data:
+  build_data:
+  mix_data:
+  hex_data:
+  postgres_data:

@@ -5,11 +5,22 @@ import Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
+db_username = System.get_env("POSTGRES_USER") || System.get_env("USER") || "jidohyun"
+db_password = System.get_env("POSTGRES_PASSWORD") || ""
+db_hostname = System.get_env("POSTGRES_HOST") || "localhost"
+db_port = String.to_integer(System.get_env("POSTGRES_PORT") || "5432")
+# Test DB name does NOT fall back to POSTGRES_DB to prevent test runs from
+# accidentally touching the dev database when both vars are set.
+db_database =
+  (System.get_env("TEST_POSTGRES_DB") || "auto_my_invoice_test") <>
+    "#{System.get_env("MIX_TEST_PARTITION")}"
+
 config :auto_my_invoice, AutoMyInvoice.Repo,
-  username: "jidohyun",
-  password: "",
-  hostname: "localhost",
-  database: "auto_my_invoice_test#{System.get_env("MIX_TEST_PARTITION")}",
+  username: db_username,
+  password: db_password,
+  hostname: db_hostname,
+  port: db_port,
+  database: db_database,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -28,6 +39,10 @@ config :swoosh, :api_client, false
 
 # Configure Oban for test (inline execution, no queues)
 config :auto_my_invoice, Oban, testing: :inline
+
+# ChromicPDF: disable Chrome sandbox so tests can boot inside Docker (or any
+# unprivileged container) without requiring a user-namespace sandbox profile.
+config :auto_my_invoice, ChromicPDF, chrome_args: "--no-sandbox"
 
 # Print only warnings and errors during test
 config :logger, level: :warning

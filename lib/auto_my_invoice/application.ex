@@ -14,7 +14,7 @@ defmodule AutoMyInvoice.Application do
       {Phoenix.PubSub, name: AutoMyInvoice.PubSub},
       {Cachex, name: :auto_my_invoice_cache},
       {Oban, Application.fetch_env!(:auto_my_invoice, Oban)},
-      ChromicPDF,
+      {ChromicPDF, Application.get_env(:auto_my_invoice, ChromicPDF, [])},
       AutoMyInvoiceWeb.Endpoint
     ]
 

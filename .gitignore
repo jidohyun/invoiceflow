@@ -46,10 +46,13 @@ npm-debug.log
 # OMC state
 .omc/
 
+# Hermes agent state
+.hermes/
+
 # Environment
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
 # MCP config (contains API tokens)
 .mcp.json
