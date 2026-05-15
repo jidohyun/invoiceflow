@@ -1,11 +1,20 @@
 import Config
 
 # Configure your database
+# Values fall back to native-friendly defaults; Docker compose overrides
+# them via environment variables (POSTGRES_USER, POSTGRES_HOST, ...).
+db_username = System.get_env("POSTGRES_USER") || System.get_env("USER") || "jidohyun"
+db_password = System.get_env("POSTGRES_PASSWORD") || ""
+db_hostname = System.get_env("POSTGRES_HOST") || "localhost"
+db_port = String.to_integer(System.get_env("POSTGRES_PORT") || "5432")
+db_database = System.get_env("POSTGRES_DB") || "auto_my_invoice_dev"
+
 config :auto_my_invoice, AutoMyInvoice.Repo,
-  username: "jidohyun",
-  password: "",
-  hostname: "localhost",
-  database: "auto_my_invoice_dev",
+  username: db_username,
+  password: db_password,
+  hostname: db_hostname,
+  port: db_port,
+  database: db_database,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -16,10 +25,19 @@ config :auto_my_invoice, AutoMyInvoice.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
+# Phoenix bind address.
+# Native dev defaults to loopback; Docker compose overrides with 0.0.0.0
+# so that the host can reach the server on the published port.
+phx_host_bind =
+  (System.get_env("PHX_HOST_BIND") || "127.0.0.1")
+  |> String.split(".")
+  |> Enum.map(&String.to_integer/1)
+  |> List.to_tuple()
+
 config :auto_my_invoice, AutoMyInvoiceWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}],
+  http: [ip: phx_host_bind],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
@@ -69,6 +87,13 @@ config :auto_my_invoice, AutoMyInvoiceWeb.Endpoint,
 
 # Enable dev routes for dashboard and mailbox
 config :auto_my_invoice, dev_routes: true
+
+# ChromicPDF: allow disabling Chrome sandbox in containerized dev environments.
+# Default to no-sandbox so the dev server can boot inside Docker; native devs
+# can override with CHROMIC_PDF_NO_SANDBOX=0 if their host Chrome supports it.
+if System.get_env("CHROMIC_PDF_NO_SANDBOX", "1") in ~w(1 true yes) do
+  config :auto_my_invoice, ChromicPDF, chrome_args: "--no-sandbox"
+end
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

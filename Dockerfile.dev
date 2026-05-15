@@ -1,0 +1,49 @@
+# Development Dockerfile for AutoMyInvoice
+# Uses a newer Elixir than the production Dockerfile because the project's
+# dev config uses sigil modifiers (~r"..."E) that require Elixir 1.18+.
+ARG ELIXIR_VERSION=1.19.5
+ARG OTP_VERSION=27.2.4
+ARG DEBIAN_VERSION=bookworm-20260505-slim
+
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}
+
+RUN apt-get update -y \
+ && apt-get install -y --no-install-recommends \
+      build-essential \
+      git \
+      curl \
+      ca-certificates \
+      postgresql-client \
+      inotify-tools \
+      locales \
+      chromium \
+      fonts-liberation \
+ && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
+ && locale-gen \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
+
+# Install Node.js 20 (esbuild/tailwind binaries are auto-downloaded by mix,
+# but having node available helps for any future asset tooling.)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt-get install -y --no-install-recommends nodejs \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN mix local.hex --force && mix local.rebar --force
+
+# Pre-create writable HOME and deps/build dirs for the unprivileged user that
+# compose runs as. Docker named volumes inherit ownership from the image path
+# they mount onto, so these dirs must exist with world-writable perms before
+# any anonymous/named volume is layered over them.
+RUN mkdir -p /home/dev/.mix /home/dev/.hex /home/dev/.cache \
+             /app /app/deps /app/_build \
+ && chmod -R 0777 /home/dev /app
+
+WORKDIR /app
+
+CMD ["bash"]
