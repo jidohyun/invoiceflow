@@ -57,10 +57,10 @@ defmodule AutoMyInvoiceWeb.UploadLiveTest do
   end
 
   describe "AC-3 reset handler" do
-    test "handle_event/3 for 'reset' clears extraction_job and re-renders the upload form" do
-      # Build a minimal socket with extraction_job pre-assigned, then call the
-      # handler directly. This is the most reliable way to exercise the reset
-      # path without going through the live_file_input fixture for an actual
+    test "handle_event/3 for 'reset' empties extraction_jobs and re-renders the upload form" do
+      # Build a minimal socket with one in-flight ExtractionJob in the batch
+      # list, then call the handler directly. This exercises the reset path
+      # without going through the live_file_input fixture for an actual
       # multipart upload.
       job = %Extraction.ExtractionJob{
         id: Ecto.UUID.generate(),
@@ -69,10 +69,30 @@ defmodule AutoMyInvoiceWeb.UploadLiveTest do
         confidence_score: 0.9
       }
 
-      socket = %Phoenix.LiveView.Socket{assigns: %{extraction_job: job, __changed__: %{}}}
+      socket = %Phoenix.LiveView.Socket{
+        assigns: %{extraction_jobs: [job], __changed__: %{}}
+      }
 
       assert {:noreply, new_socket} = UploadLive.handle_event("reset", %{}, socket)
-      assert new_socket.assigns.extraction_job == nil
+      assert new_socket.assigns.extraction_jobs == []
+    end
+
+    # Regression: AMI-85 — UploadLive previously held a single :extraction_job
+    # assign and could not show per-file progress for a batch. The new
+    # "dismiss-job" event removes one job from the list while leaving the
+    # others untouched, so the user can clear processed results one by one.
+    test "handle_event/3 for 'dismiss-job' removes only the matching job from the batch" do
+      job_a = %Extraction.ExtractionJob{id: Ecto.UUID.generate(), status: "completed"}
+      job_b = %Extraction.ExtractionJob{id: Ecto.UUID.generate(), status: "processing"}
+
+      socket = %Phoenix.LiveView.Socket{
+        assigns: %{extraction_jobs: [job_a, job_b], __changed__: %{}}
+      }
+
+      assert {:noreply, new_socket} =
+               UploadLive.handle_event("dismiss-job", %{"id" => job_a.id}, socket)
+
+      assert Enum.map(new_socket.assigns.extraction_jobs, & &1.id) == [job_b.id]
     end
   end
 
