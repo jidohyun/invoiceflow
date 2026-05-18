@@ -2,8 +2,12 @@ package com.invoiceflow.core.data
 
 import com.invoiceflow.features.clients.data.model.ClientDto
 import com.invoiceflow.features.invoices.data.model.InvoiceDto
-import com.invoiceflow.features.invoices.data.model.InvoiceLineItemDto
+import com.invoiceflow.features.invoices.data.model.InvoiceItemDto
 
+/**
+ * Mock data used for Compose previews and the offline empty-state path.
+ * Field names match `JsonHelpers.render_invoice/1` on the backend.
+ */
 object MockData {
     val clients = listOf(
         ClientDto(id = "1", name = "주식회사 테크스타", email = "billing@techstar.co.kr", phone = "02-1234-5678", company = "테크스타"),
@@ -14,47 +18,42 @@ object MockData {
     val invoices = listOf(
         InvoiceDto(
             id = "1", invoiceNumber = "INV-2026-001", status = "paid",
-            client = clients[0],
-            lineItems = listOf(InvoiceLineItemDto(description = "UI 디자인", quantity = 1.0, unitPrice = 1500000)),
-            subtotal = 1500000, taxAmount = 150000, total = 1650000, currency = "KRW",
-            issuedAt = "2026-03-01", dueAt = "2026-03-15", paidAt = "2026-03-10",
-            paymentMethod = "bank_transfer", notes = null,
+            amount = "1650000", paidAmount = "1650000", currency = "KRW",
+            dueDate = "2026-03-15", sentAt = "2026-03-01T00:00:00Z", paidAt = "2026-03-10T00:00:00Z",
+            notes = null, clientId = clients[0].id, client = clients[0],
+            items = listOf(InvoiceItemDto(description = "UI 디자인", quantity = "1", unitPrice = "1500000")),
             insertedAt = "2026-03-01T00:00:00Z", updatedAt = "2026-03-10T00:00:00Z",
         ),
         InvoiceDto(
             id = "2", invoiceNumber = "INV-2026-002", status = "sent",
-            client = clients[1],
-            lineItems = listOf(InvoiceLineItemDto(description = "브랜딩 작업", quantity = 1.0, unitPrice = 850000)),
-            subtotal = 850000, taxAmount = 85000, total = 935000, currency = "KRW",
-            issuedAt = "2026-03-05", dueAt = "2026-03-20", paidAt = null,
-            paymentMethod = null, notes = "2차 작업분",
+            amount = "935000", paidAmount = "0", currency = "KRW",
+            dueDate = "2026-03-20", sentAt = "2026-03-05T00:00:00Z", paidAt = null,
+            notes = "2차 작업분", clientId = clients[1].id, client = clients[1],
+            items = listOf(InvoiceItemDto(description = "브랜딩 작업", quantity = "1", unitPrice = "850000")),
             insertedAt = "2026-03-05T00:00:00Z", updatedAt = "2026-03-05T00:00:00Z",
         ),
         InvoiceDto(
             id = "3", invoiceNumber = "INV-2026-003", status = "overdue",
-            client = clients[2],
-            lineItems = listOf(InvoiceLineItemDto(description = "개발 컨설팅", quantity = 4.0, unitPrice = 800000)),
-            subtotal = 3200000, taxAmount = 320000, total = 3520000, currency = "KRW",
-            issuedAt = "2026-02-10", dueAt = "2026-02-28", paidAt = null,
-            paymentMethod = null, notes = null,
+            amount = "3520000", paidAmount = "0", currency = "KRW",
+            dueDate = "2026-02-28", sentAt = "2026-02-10T00:00:00Z", paidAt = null,
+            notes = null, clientId = clients[2].id, client = clients[2],
+            items = listOf(InvoiceItemDto(description = "개발 컨설팅", quantity = "4", unitPrice = "800000")),
             insertedAt = "2026-02-10T00:00:00Z", updatedAt = "2026-02-10T00:00:00Z",
         ),
         InvoiceDto(
             id = "4", invoiceNumber = "INV-2026-004", status = "partially_paid",
-            client = clients[0],
-            lineItems = listOf(InvoiceLineItemDto(description = "앱 개발", quantity = 1.0, unitPrice = 2100000)),
-            subtotal = 2100000, taxAmount = 210000, total = 2310000, currency = "KRW",
-            issuedAt = "2026-03-08", dueAt = "2026-03-25", paidAt = null,
-            paymentMethod = null, notes = null,
+            amount = "2310000", paidAmount = "1000000", currency = "KRW",
+            dueDate = "2026-03-25", sentAt = "2026-03-08T00:00:00Z", paidAt = null,
+            notes = null, clientId = clients[0].id, client = clients[0],
+            items = listOf(InvoiceItemDto(description = "앱 개발", quantity = "1", unitPrice = "2100000")),
             insertedAt = "2026-03-08T00:00:00Z", updatedAt = "2026-03-08T00:00:00Z",
         ),
         InvoiceDto(
             id = "5", invoiceNumber = "INV-2026-005", status = "draft",
-            client = clients[1],
-            lineItems = listOf(InvoiceLineItemDto(description = "로고 디자인", quantity = 1.0, unitPrice = 500000)),
-            subtotal = 500000, taxAmount = 50000, total = 550000, currency = "KRW",
-            issuedAt = null, dueAt = "2026-04-01", paidAt = null,
-            paymentMethod = null, notes = "초안",
+            amount = "550000", paidAmount = "0", currency = "KRW",
+            dueDate = "2026-04-01", sentAt = null, paidAt = null,
+            notes = "초안", clientId = clients[1].id, client = clients[1],
+            items = listOf(InvoiceItemDto(description = "로고 디자인", quantity = "1", unitPrice = "500000")),
             insertedAt = "2026-03-10T00:00:00Z", updatedAt = "2026-03-10T00:00:00Z",
         ),
     )

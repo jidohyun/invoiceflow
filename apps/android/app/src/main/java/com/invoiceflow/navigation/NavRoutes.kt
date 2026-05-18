@@ -6,6 +6,7 @@ sealed class NavRoutes(val route: String) {
     data object Register : NavRoutes("register")
 
     // Main
+    data object Dashboard : NavRoutes("dashboard")
     data object InvoiceList : NavRoutes("invoices")
     data object InvoiceDetail : NavRoutes("invoices/{invoiceId}") {
         fun createRoute(invoiceId: String) = "invoices/$invoiceId"

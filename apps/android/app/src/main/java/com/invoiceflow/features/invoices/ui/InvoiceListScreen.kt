@@ -30,6 +30,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -120,23 +126,34 @@ fun InvoiceListScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when {
-                state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                state.error != null -> Text(
-                    text = state.error ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center),
+            Column(modifier = Modifier.fillMaxSize()) {
+                FilterBar(
+                    statusFilter = state.statusFilter,
+                    search = state.search,
+                    onStatusChange = viewModel::setStatusFilter,
+                    onSearchChange = viewModel::setSearch,
                 )
-                state.invoices.isEmpty() -> Text(
-                    text = "No invoices yet",
-                    modifier = Modifier.align(Alignment.Center),
-                )
-                else -> LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.invoices, key = { it.id }) { invoice ->
-                        InvoiceListItem(
-                            invoice = invoice,
-                            onClick = { onNavigateToDetail(invoice.id) },
+                when {
+                    state.isLoading -> Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                    state.error != null -> Box(Modifier.fillMaxSize()) {
+                        Text(
+                            text = state.error ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.align(Alignment.Center),
                         )
+                    }
+                    state.invoices.isEmpty() -> Box(Modifier.fillMaxSize()) {
+                        Text(text = "조건에 맞는 송장이 없습니다", modifier = Modifier.align(Alignment.Center))
+                    }
+                    else -> LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(state.invoices, key = { it.id }) { invoice ->
+                            InvoiceListItem(
+                                invoice = invoice,
+                                onClick = { onNavigateToDetail(invoice.id) },
+                            )
+                        }
                     }
                 }
             }
@@ -175,11 +192,11 @@ private fun InvoiceListItem(
             Column {
                 Text(text = "#${invoice.invoiceNumber}", style = MaterialTheme.typography.titleMedium)
                 Text(text = invoice.client?.name ?: "", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Due: ${invoice.dueAt ?: ""}", style = MaterialTheme.typography.bodySmall)
+                Text(text = "Due: ${invoice.dueDate ?: ""}", style = MaterialTheme.typography.bodySmall)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "${invoice.currency} ${invoice.total / 100.0}",
+                    text = "${invoice.currency} ${invoice.amount}",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
@@ -190,6 +207,43 @@ private fun InvoiceListItem(
                         "overdue" -> MaterialTheme.colorScheme.error
                         else -> MaterialTheme.colorScheme.onSurface
                     }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterBar(
+    statusFilter: String?,
+    search: String,
+    onStatusChange: (String?) -> Unit,
+    onSearchChange: (String) -> Unit,
+) {
+    val options: List<Pair<String?, String>> = listOf(
+        null to "전체",
+        "draft" to "임시저장",
+        "sent" to "발송",
+        "overdue" to "연체",
+        "paid" to "결제완료",
+        "partially_paid" to "부분결제",
+    )
+    Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+        OutlinedTextField(
+            value = search,
+            onValueChange = onSearchChange,
+            placeholder = { Text("송장 번호, 거래처, 메모 검색") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(8.dp))
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            items(options) { (value, label) ->
+                FilterChip(
+                    selected = statusFilter == value,
+                    onClick = { onStatusChange(value) },
+                    label = { Text(label) },
                 )
             }
         }

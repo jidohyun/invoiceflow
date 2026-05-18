@@ -4,53 +4,64 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.invoiceflow.features.clients.data.model.ClientDto
 
+/**
+ * Matches AutoMyInvoiceWeb.Api.JsonHelpers.render_invoice/1.
+ *
+ * Money fields (`amount`, `paidAmount`, item `unitPrice`) come over as
+ * JSON strings because Phoenix renders Decimal as strings to preserve
+ * precision — the UI converts to BigDecimal when needed.
+ */
 @JsonClass(generateAdapter = true)
 data class InvoiceDto(
     val id: String,
     @Json(name = "invoice_number") val invoiceNumber: String,
     val status: String,
-    val client: ClientDto?,
-    @Json(name = "line_items") val lineItems: List<InvoiceLineItemDto> = emptyList(),
-    val subtotal: Long = 0,
-    @Json(name = "tax_amount") val taxAmount: Long = 0,
-    val total: Long = 0,
+    val amount: String,
+    @Json(name = "paid_amount") val paidAmount: String,
     val currency: String,
-    @Json(name = "issued_at") val issuedAt: String?,
-    @Json(name = "due_at") val dueAt: String?,
+    @Json(name = "due_date") val dueDate: String?,
+    @Json(name = "sent_at") val sentAt: String?,
     @Json(name = "paid_at") val paidAt: String?,
-    @Json(name = "payment_method") val paymentMethod: String?,
     val notes: String?,
+    @Json(name = "client_id") val clientId: String?,
+    val client: ClientDto?,
+    val items: List<InvoiceItemDto> = emptyList(),
     @Json(name = "inserted_at") val insertedAt: String,
     @Json(name = "updated_at") val updatedAt: String,
 )
 
 @JsonClass(generateAdapter = true)
-data class InvoiceLineItemDto(
+data class InvoiceItemDto(
     val id: String? = null,
     val description: String,
-    val quantity: Double,
-    @Json(name = "unit_price") val unitPrice: Long,
-    @Json(name = "tax_rate") val taxRate: Double = 0.0,
-    val amount: Long? = null,
+    val quantity: String,
+    @Json(name = "unit_price") val unitPrice: String,
+    val position: Int? = null,
 )
 
 @JsonClass(generateAdapter = true)
 data class InvoiceCreateRequest(
     @Json(name = "client_id") val clientId: String,
-    @Json(name = "line_items") val lineItems: List<InvoiceLineItemDto>,
+    val amount: String,
     val currency: String = "KRW",
-    @Json(name = "issued_at") val issuedAt: String? = null,
-    @Json(name = "due_at") val dueAt: String? = null,
+    @Json(name = "due_date") val dueDate: String,
     val notes: String? = null,
+    val items: List<InvoiceItemRequest> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class InvoiceItemRequest(
+    val description: String,
+    val quantity: String = "1",
+    @Json(name = "unit_price") val unitPrice: String,
 )
 
 @JsonClass(generateAdapter = true)
 data class InvoiceUpdateRequest(
     @Json(name = "client_id") val clientId: String? = null,
-    @Json(name = "line_items") val lineItems: List<InvoiceLineItemDto>? = null,
+    val amount: String? = null,
     val currency: String? = null,
-    @Json(name = "issued_at") val issuedAt: String? = null,
-    @Json(name = "due_at") val dueAt: String? = null,
+    @Json(name = "due_date") val dueDate: String? = null,
     val notes: String? = null,
 )
 

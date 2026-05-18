@@ -18,6 +18,9 @@ data class InvoiceListState(
     val invoices: List<InvoiceDto> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
+    /** One of: null (all) | "draft" | "sent" | "overdue" | "paid" | "partially_paid". */
+    val statusFilter: String? = null,
+    val search: String = "",
 )
 
 data class InvoiceDetailState(
@@ -38,19 +41,40 @@ class InvoiceViewModel @Inject constructor(
     val detailState: StateFlow<InvoiceDetailState> = _detailState.asStateFlow()
 
     fun loadInvoices() {
+        val state = _listState.value
         viewModelScope.launch {
             _listState.update { it.copy(isLoading = true, error = null) }
             try {
-                val response = invoiceRepository.getInvoices()
+                val response = invoiceRepository.getInvoices(
+                    status = state.statusFilter,
+                    search = state.search.takeIf { q -> q.isNotBlank() },
+                )
                 _listState.update { it.copy(invoices = response.data, isLoading = false) }
             } catch (e: Exception) {
                 if (BuildConfig.DEBUG) {
-                    _listState.update { it.copy(invoices = MockData.invoices, isLoading = false) }
+                    val filtered = MockData.invoices
+                        .filter { state.statusFilter == null || it.status == state.statusFilter }
+                        .filter {
+                            state.search.isBlank() ||
+                                it.invoiceNumber.contains(state.search, ignoreCase = true) ||
+                                (it.client?.name ?: "").contains(state.search, ignoreCase = true)
+                        }
+                    _listState.update { it.copy(invoices = filtered, isLoading = false) }
                 } else {
                     _listState.update { it.copy(error = e.message ?: "Failed to load invoices", isLoading = false) }
                 }
             }
         }
+    }
+
+    fun setStatusFilter(status: String?) {
+        _listState.update { it.copy(statusFilter = status) }
+        loadInvoices()
+    }
+
+    fun setSearch(query: String) {
+        _listState.update { it.copy(search = query) }
+        loadInvoices()
     }
 
     fun loadInvoice(id: String) {

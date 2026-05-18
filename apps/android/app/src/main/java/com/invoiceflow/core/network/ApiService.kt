@@ -41,9 +41,9 @@ interface ApiService {
     @DELETE("auth/logout")
     suspend fun logout()
 
-    // Dashboard
-    @GET("dashboard/kpi")
-    suspend fun getDashboardKpi(@Query("period") period: String = "month"): ApiResponse<KpiSummaryDto>
+    // Dashboard — backend route is /api/v1/dashboard (DashboardController :index).
+    @GET("dashboard")
+    suspend fun getDashboardKpi(): ApiResponse<KpiSummaryDto>
 
     @GET("dashboard/recent")
     suspend fun getRecentInvoices(@Query("limit") limit: Int = 5): ApiResponse<List<InvoiceDto>>

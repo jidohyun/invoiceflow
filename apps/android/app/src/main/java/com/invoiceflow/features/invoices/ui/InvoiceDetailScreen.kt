@@ -68,8 +68,8 @@ fun InvoiceDetailScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(text = "Client: ${invoice.client?.name ?: ""}", style = MaterialTheme.typography.bodyLarge)
                         Text(text = "Status: ${invoice.status.uppercase()}", style = MaterialTheme.typography.bodyLarge)
-                        Text(text = "Amount: ${invoice.currency} ${invoice.total}", style = MaterialTheme.typography.bodyLarge)
-                        Text(text = "Due: ${invoice.dueAt}", style = MaterialTheme.typography.bodyLarge)
+                        Text(text = "Amount: ${invoice.currency} ${invoice.amount}", style = MaterialTheme.typography.bodyLarge)
+                        Text(text = "Due: ${invoice.dueDate ?: "-"}", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }

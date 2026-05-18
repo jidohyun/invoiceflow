@@ -2,7 +2,7 @@ package com.invoiceflow.features.upload.data.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.invoiceflow.features.invoices.data.model.InvoiceLineItemDto
+import com.invoiceflow.features.invoices.data.model.InvoiceItemDto
 
 @JsonClass(generateAdapter = true)
 data class ExtractionJobDto(
@@ -25,5 +25,5 @@ data class ExtractedDataDto(
     @Json(name = "due_at") val dueAt: String? = null,
     val total: Long? = null,
     val currency: String? = null,
-    @Json(name = "line_items") val lineItems: List<InvoiceLineItemDto> = emptyList(),
+    @Json(name = "line_items") val lineItems: List<InvoiceItemDto> = emptyList(),
 )

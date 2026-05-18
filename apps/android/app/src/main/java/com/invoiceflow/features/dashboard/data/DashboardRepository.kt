@@ -8,6 +8,6 @@ import javax.inject.Singleton
 
 @Singleton
 class DashboardRepository @Inject constructor(private val apiService: ApiService) {
-    suspend fun getKpi(period: String = "month"): KpiSummaryDto = apiService.getDashboardKpi(period).data
+    suspend fun getKpi(): KpiSummaryDto = apiService.getDashboardKpi().data
     suspend fun getRecentInvoices(limit: Int = 5): List<InvoiceDto> = apiService.getRecentInvoices(limit).data
 }

@@ -90,6 +90,12 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+
+    // AMI-88: Firebase Cloud Messaging — push notifications for payment-received,
+    // overdue, and reminder-sent events. BoM keeps internal artifacts in sync.
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
