@@ -271,12 +271,15 @@ defmodule AutoMyInvoice.Invoices do
   """
   @spec total_outstanding(map()) :: {Decimal.t(), non_neg_integer(), String.t()}
   def total_outstanding(user) do
+    # AMI-90: sum across currencies using the cached KRW amount. Falls back
+    # to :amount when :amount_krw is nil (no FX rate cached yet) so KRW-only
+    # accounts keep working before the first FX refresh.
     result =
       from(i in Invoice,
         where: i.user_id == ^user.id,
         where: i.status in ~w(sent overdue),
         select: %{
-          total: coalesce(sum(i.amount), ^Decimal.new(0)),
+          total: coalesce(sum(coalesce(i.amount_krw, i.amount)), ^Decimal.new(0)),
           overdue_count:
             fragment(
               "CAST(SUM(CASE WHEN ? = 'overdue' THEN 1 ELSE 0 END) AS integer)",
@@ -286,18 +289,7 @@ defmodule AutoMyInvoice.Invoices do
       )
       |> Repo.one()
 
-    primary_currency =
-      from(i in Invoice,
-        where: i.user_id == ^user.id,
-        where: i.status in ~w(sent overdue),
-        group_by: i.currency,
-        order_by: [desc: count(i.id)],
-        limit: 1,
-        select: i.currency
-      )
-      |> Repo.one()
-
-    {result.total || Decimal.new(0), result.overdue_count || 0, primary_currency || "USD"}
+    {result.total || Decimal.new(0), result.overdue_count || 0, "KRW"}
   end
 
   @doc """

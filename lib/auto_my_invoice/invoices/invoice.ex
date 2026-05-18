@@ -11,6 +11,10 @@ defmodule AutoMyInvoice.Invoices.Invoice do
     field :invoice_number, :string
     field :amount, :decimal
     field :currency, :string, default: "KRW"
+    # KRW-equivalent cached at write time so dashboards can sum across
+    # currencies without joining fx_rates. Recomputed on every changeset
+    # whose :amount or :currency changes.
+    field :amount_krw, :decimal
     field :due_date, :date
     field :status, :string, default: "draft"
     field :notes, :string
@@ -43,7 +47,8 @@ defmodule AutoMyInvoice.Invoices.Invoice do
     :paid_at,
     :paid_amount,
     :sent_at,
-    :overdue_notified_at
+    :overdue_notified_at,
+    :amount_krw
   ]
 
   def create_changeset(invoice, attrs) do
@@ -55,6 +60,7 @@ defmodule AutoMyInvoice.Invoices.Invoice do
     |> validate_inclusion(:status, @statuses)
     |> validate_due_date_not_past()
     |> generate_invoice_number()
+    |> put_amount_krw()
     |> cast_assoc(:items, with: &AutoMyInvoice.Invoices.InvoiceItem.changeset/2)
     |> foreign_key_constraint(:client_id)
   end
@@ -66,6 +72,7 @@ defmodule AutoMyInvoice.Invoices.Invoice do
     |> validate_inclusion(:currency, ~w(USD EUR KRW GBP JPY))
     |> validate_inclusion(:status, @statuses)
     |> validate_status_transition()
+    |> put_amount_krw()
     |> cast_assoc(:items, with: &AutoMyInvoice.Invoices.InvoiceItem.changeset/2)
   end
 
@@ -82,6 +89,34 @@ defmodule AutoMyInvoice.Invoices.Invoice do
   end
 
   ## Private
+
+  # Compute & cache amount_krw whenever amount or currency are about to be
+  # written. Falls back to leaving the existing value alone when the FX rate
+  # for the target currency isn't cached yet — the daily refresh worker will
+  # backfill on its next run.
+  defp put_amount_krw(changeset) do
+    amount   = get_field(changeset, :amount)
+    currency = get_field(changeset, :currency)
+
+    cond do
+      is_nil(amount) or is_nil(currency) ->
+        changeset
+
+      currency == "KRW" ->
+        put_change(changeset, :amount_krw, Decimal.round(to_decimal(amount), 2))
+
+      true ->
+        case AutoMyInvoice.FxRates.to_krw(amount, currency) do
+          {:ok, krw} -> put_change(changeset, :amount_krw, krw)
+          {:error, :missing_rate} -> changeset
+        end
+    end
+  end
+
+  defp to_decimal(%Decimal{} = d), do: d
+  defp to_decimal(n) when is_integer(n), do: Decimal.new(n)
+  defp to_decimal(n) when is_float(n), do: Decimal.from_float(n)
+  defp to_decimal(n) when is_binary(n), do: Decimal.new(n)
 
   defp generate_invoice_number(changeset) do
     if get_field(changeset, :invoice_number) do

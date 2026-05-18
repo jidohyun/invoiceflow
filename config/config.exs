@@ -42,7 +42,10 @@ config :auto_my_invoice, Oban,
     {Oban.Plugins.Cron,
      crontab: [
        {"0 * * * *", AutoMyInvoice.Workers.ReminderScheduler},
-       {"0 9 * * *", AutoMyInvoice.Workers.OverdueScanner}
+       {"0 9 * * *", AutoMyInvoice.Workers.OverdueScanner},
+       # AMI-90: 18:00 UTC = 03:00 Asia/Seoul, right after exchangerate.host
+       # rotates its daily rates and well before Korean business hours.
+       {"0 18 * * *", AutoMyInvoice.Workers.FxRateRefreshWorker}
      ]}
   ]
 

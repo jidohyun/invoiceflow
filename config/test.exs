@@ -40,6 +40,11 @@ config :swoosh, :api_client, false
 # Configure Oban for test (inline execution, no queues)
 config :auto_my_invoice, Oban, testing: :inline
 
+# AMI-90: stub the FX rate HTTP client so tests are deterministic and
+# offline-safe. AutoMyInvoice.FxRatesStub returns fixed USD/EUR/JPY/GBP→KRW
+# rates and lives under test/support.
+config :auto_my_invoice, AutoMyInvoice.FxRates, client: AutoMyInvoice.FxRatesStub
+
 # ChromicPDF: disable Chrome sandbox so tests can boot inside Docker (or any
 # unprivileged container) without requiring a user-namespace sandbox profile.
 config :auto_my_invoice, ChromicPDF, chrome_args: "--no-sandbox"

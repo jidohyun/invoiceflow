@@ -21,7 +21,7 @@ defmodule AutoMyInvoice.Analytics do
         group_by: fragment("to_char(?, 'YYYY-MM')", i.inserted_at),
         select: %{
           month: fragment("to_char(?, 'YYYY-MM')", i.inserted_at),
-          invoiced: coalesce(sum(i.amount), 0),
+          invoiced: coalesce(sum(coalesce(i.amount_krw, i.amount)), 0),
           count: count(i.id)
         }
       )
@@ -68,7 +68,7 @@ defmodule AutoMyInvoice.Analytics do
       select: %{
         status: i.status,
         count: count(i.id),
-        total: coalesce(sum(i.amount), 0)
+        total: coalesce(sum(coalesce(i.amount_krw, i.amount)), 0)
       }
     )
     |> Repo.all()
@@ -88,8 +88,10 @@ defmodule AutoMyInvoice.Analytics do
         where: i.status in ~w(sent overdue partially_paid),
         where: not is_nil(i.due_date),
         select: %{
-          amount: i.amount,
+          # AMI-90: KRW-equivalent so aging buckets sum correctly across currencies.
+          amount: coalesce(i.amount_krw, i.amount),
           paid_amount: i.paid_amount,
+          currency: i.currency,
           due_date: i.due_date
         }
       )
@@ -130,8 +132,10 @@ defmodule AutoMyInvoice.Analytics do
         join: c in Client,
         on: c.id == i.client_id,
         select: %{
-          amount: i.amount,
+          # AMI-90: KRW-equivalent so cashflow forecast sums correctly.
+          amount: coalesce(i.amount_krw, i.amount),
           paid_amount: i.paid_amount,
+          currency: i.currency,
           due_date: i.due_date,
           avg_payment_days: c.avg_payment_days
         }
