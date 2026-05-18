@@ -10,6 +10,7 @@ defmodule AutoMyInvoice.Invoices do
   alias AutoMyInvoice.Emails.InvoiceEmail
   alias AutoMyInvoice.Mailer
   alias AutoMyInvoice.Billing.PaddleClient
+  alias AutoMyInvoice.Clients
 
   ## 조회
 
@@ -66,6 +67,58 @@ defmodule AutoMyInvoice.Invoices do
       |> tap_ok(&broadcast_invoice_change/1)
     else
       {:error, :plan_limit}
+    end
+  end
+
+  ## AMI-89 — 즉시 송장 (현장 QR 결제)
+
+  @walk_in_email "walk-in@auto-my-invoice.internal"
+
+  @doc """
+  Create a single-line "instant invoice" without picking a client first.
+  Used by the on-the-spot QR flow: enter amount → generate QR → customer
+  scans → Paddle payment link.
+
+  Invoices need a `client_id`, so we (idempotently) get-or-create a
+  per-user "Walk-in customer" client and attach this invoice to it.
+  The invoice is created in `sent` status so the Paddle link is available
+  immediately for the QR.
+  """
+  @spec create_quick_invoice(Accounts.User.t(), map()) ::
+          {:ok, Invoice.t()} | {:error, :plan_limit | Ecto.Changeset.t()}
+  def create_quick_invoice(user, attrs) do
+    walk_in = ensure_walk_in_client!(user.id)
+
+    full_attrs =
+      attrs
+      |> Map.put(:client_id, walk_in.id)
+      |> Map.put_new(:due_date, Date.utc_today())
+      |> Map.put(:status, "sent")
+      |> Map.put(:sent_at, DateTime.truncate(DateTime.utc_now(), :second))
+
+    case create_invoice(user, full_attrs) do
+      {:ok, invoice} ->
+        invoice = maybe_create_payment_link(Repo.preload(invoice, [:client, :user]))
+        {:ok, invoice}
+
+      error ->
+        error
+    end
+  end
+
+  defp ensure_walk_in_client!(user_id) do
+    case Clients.get_client_by_email(user_id, @walk_in_email) do
+      %Clients.Client{} = c ->
+        c
+
+      nil ->
+        {:ok, c} =
+          Clients.create_client(user_id, %{
+            name: "워크인 고객",
+            email: @walk_in_email
+          })
+
+        c
     end
   end
 

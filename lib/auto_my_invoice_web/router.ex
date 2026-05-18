@@ -91,6 +91,9 @@ defmodule AutoMyInvoiceWeb.Router do
     pipe_through :browser
 
     get "/welcome", PageController, :home
+    # AMI-89: public scan-to-pay landing — opens from a QR shown on the
+    # merchant's phone, no login required for the customer.
+    live "/pay/:id", PayLive
   end
 
   # Public routes (redirect if already authenticated)
@@ -120,6 +123,7 @@ defmodule AutoMyInvoiceWeb.Router do
       live "/", DashboardLive
       live "/invoices", InvoiceLive.Index
       live "/invoices/new", InvoiceLive.New
+      live "/invoices/quick", InvoiceLive.Quick
       live "/invoices/:id", InvoiceLive.Show
       live "/invoices/:id/edit", InvoiceLive.Edit
       live "/clients", ClientLive.Index

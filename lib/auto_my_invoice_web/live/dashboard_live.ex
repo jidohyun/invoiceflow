@@ -53,6 +53,9 @@ defmodule AutoMyInvoiceWeb.DashboardLive do
         <.link navigate={~p"/upload"} class="btn btn-ghost btn-sm btn-circle">
           <span class="material-icons text-base-content/60">notifications</span>
         </.link>
+        <.link navigate={~p"/invoices/quick"} class="btn btn-outline btn-sm gap-1">
+          <.icon name="hero-qr-code" class="size-4" /> 즉시 QR
+        </.link>
         <.link navigate={~p"/invoices/new"} class="btn btn-primary btn-sm gap-1">
           <.icon name="hero-plus" class="size-4" /> 새 송장
         </.link>
