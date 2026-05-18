@@ -73,6 +73,13 @@ defmodule AutoMyInvoice.Accounts.User do
     false
   end
 
+  def password_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:password])
+    |> validate_confirmation(:password, message: "비밀번호가 일치하지 않습니다")
+    |> validate_password(opts)
+  end
+
   defp validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])

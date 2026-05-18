@@ -1,6 +1,8 @@
 defmodule AutoMyInvoiceWeb.UserForgotPasswordLive do
   use AutoMyInvoiceWeb, :live_view
 
+  alias AutoMyInvoice.Accounts
+
   def render(assigns) do
     ~H"""
     <div class="min-h-screen flex items-center justify-center bg-base-200 px-4 relative overflow-hidden">
@@ -20,28 +22,62 @@ defmodule AutoMyInvoiceWeb.UserForgotPasswordLive do
           </div>
           <h2 class="text-2xl font-bold font-display mb-2">비밀번호 재설정</h2>
           <p class="text-base-content/60 text-sm">
-            비밀번호 재설정 기능은 곧 제공됩니다.
+            가입하신 이메일을 입력하시면 재설정 링크를 보내드립니다.
           </p>
         </div>
 
-        <div class="bg-info/10 border border-info/20 rounded-lg p-4 mb-6">
-          <div class="flex gap-3">
-            <span class="material-icons text-info text-xl shrink-0 mt-0.5">info</span>
-            <p class="text-sm text-base-content/70">
-              당분간 비밀번호를 재설정해야 하는 경우 고객 지원으로 문의해 주세요.
-            </p>
+        <.form for={@form} id="reset_password_form" phx-submit="send_instructions" class="space-y-4">
+          <div>
+            <label for="email" class="block text-sm font-medium mb-1">이메일 주소</label>
+            <input
+              type="email"
+              name="user[email]"
+              id="email"
+              required
+              placeholder="you@example.com"
+              class="input input-bordered w-full"
+              autocomplete="email"
+            />
           </div>
-        </div>
 
-        <.link navigate={~p"/users/log_in"} class="btn btn-outline w-full">
-          로그인 화면으로
-        </.link>
+          <button type="submit" class="btn btn-primary w-full" phx-disable-with="전송 중...">
+            재설정 링크 받기
+          </button>
+        </.form>
+
+        <div class="text-center mt-6">
+          <.link navigate={~p"/users/log_in"} class="text-sm text-base-content/60 hover:text-primary">
+            로그인 화면으로
+          </.link>
+        </div>
       </div>
     </div>
     """
   end
 
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok,
+     socket
+     |> assign(:page_title, "비밀번호 재설정")
+     |> assign(form: to_form(%{}, as: "user"))}
+  end
+
+  def handle_event("send_instructions", %{"user" => %{"email" => email}}, socket) do
+    if user = Accounts.get_user_by_email(email) do
+      Accounts.deliver_user_reset_password_instructions(
+        user,
+        &url(~p"/users/reset_password/#{&1}")
+      )
+    end
+
+    # Always show the same confirmation so we don't leak which emails are
+    # registered.
+    {:noreply,
+     socket
+     |> put_flash(
+       :info,
+       "이메일이 등록되어 있다면 잠시 후 재설정 안내 메일이 도착합니다. 받은편지함을 확인해 주세요."
+     )
+     |> push_navigate(to: ~p"/users/log_in")}
   end
 end

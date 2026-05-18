@@ -102,6 +102,7 @@ defmodule AutoMyInvoiceWeb.Router do
       live "/users/register", UserRegistrationLive
       live "/users/log_in", UserLoginLive
       live "/users/reset_password", UserForgotPasswordLive
+      live "/users/reset_password/:token", UserResetPasswordLive
     end
 
     post "/users/log_in", UserSessionController, :create
