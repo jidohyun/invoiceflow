@@ -5,7 +5,6 @@ defmodule AutoMyInvoice.Accounts.UserNotifier do
 
   alias AutoMyInvoice.Mailer
 
-  @from_email "no-reply@auto-my-invoice.com"
   @from_name "AutoMyInvoice"
 
   @spec deliver_reset_password_instructions(map(), String.t()) ::
@@ -13,7 +12,7 @@ defmodule AutoMyInvoice.Accounts.UserNotifier do
   def deliver_reset_password_instructions(user, url) do
     new()
     |> to({user.email, user.email})
-    |> from({@from_name, @from_email})
+    |> from({@from_name, from_email()})
     |> subject("[AutoMyInvoice] 비밀번호 재설정 안내")
     |> text_body(reset_text(url))
     |> html_body(reset_html(url))
@@ -43,5 +42,10 @@ defmodule AutoMyInvoice.Accounts.UserNotifier do
     <p><code>#{url}</code></p>
     <p>본인이 요청한 것이 아니라면 이 메일을 무시하세요. 비밀번호는 변경되지 않습니다.</p>
     """
+  end
+
+  # AMI-16: From address comes from MAILER_FROM env var via runtime.exs.
+  defp from_email do
+    Application.get_env(:auto_my_invoice, :sender_email, "noreply@automyinvoice.local")
   end
 end

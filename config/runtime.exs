@@ -43,6 +43,48 @@ config :auto_my_invoice,
 # (it short-circuits send), so dev/test stay quiet without any DSN set.
 config :sentry, dsn: System.get_env("SENTRY_DSN")
 
+# ── Mailer (AMI-16) ─────────────────────────────────────────────────
+# Default for dev = Local mailbox preview. Override per environment
+# via MAILER_ADAPTER:
+#
+#   MAILER_ADAPTER=local           → Swoosh.Adapters.Local (default)
+#   MAILER_ADAPTER=smtp            → Swoosh.Adapters.SMTP + gen_smtp
+#                                    needs MAILER_SMTP_RELAY,
+#                                    MAILER_SMTP_USERNAME,
+#                                    MAILER_SMTP_PASSWORD,
+#                                    MAILER_SMTP_PORT (default 587),
+#                                    MAILER_SMTP_SSL (default true)
+#
+# `:sender_email` is the From address used by every transactional
+# template. Required in prod; falls back to a clearly-fake address
+# in dev to keep loopback tests honest.
+config :auto_my_invoice,
+  sender_email: System.get_env("MAILER_FROM") || "noreply@automyinvoice.local"
+
+case System.get_env("MAILER_ADAPTER") do
+  "smtp" ->
+    relay = System.get_env("MAILER_SMTP_RELAY") ||
+      raise "MAILER_ADAPTER=smtp requires MAILER_SMTP_RELAY"
+
+    port = String.to_integer(System.get_env("MAILER_SMTP_PORT") || "587")
+    ssl = System.get_env("MAILER_SMTP_SSL") in [nil, "true", "1"]
+
+    config :auto_my_invoice, AutoMyInvoice.Mailer,
+      adapter: Swoosh.Adapters.SMTP,
+      relay: relay,
+      username: System.get_env("MAILER_SMTP_USERNAME"),
+      password: System.get_env("MAILER_SMTP_PASSWORD"),
+      port: port,
+      ssl: ssl,
+      tls: :always,
+      auth: :always,
+      retries: 2
+
+  _ ->
+    # Local mailbox preview — dev / unconfigured prod.
+    :ok
+end
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

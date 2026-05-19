@@ -62,6 +62,8 @@ defmodule AutoMyInvoice.MixProject do
 
       # 이메일
       {:swoosh, "~> 1.16"},
+      # AMI-16: SMTP transport for Swoosh.Adapters.SMTP — prod default.
+      {:gen_smtp, "~> 1.2"},
       {:req, "~> 0.5"},
       # AMI-89: QR code generation for the "instant invoice" flow.
       {:eqrcode, "~> 0.2"},
