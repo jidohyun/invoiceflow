@@ -91,6 +91,9 @@ defmodule AutoMyInvoiceWeb.Router do
     pipe_through :browser
 
     get "/welcome", PageController, :home
+    # AMI-17: load-balancer health probe — plain HTTP, excluded from
+    # force_ssl in config/prod.exs.
+    get "/health", PageController, :health
     # AMI-89: public scan-to-pay landing — opens from a QR shown on the
     # merchant's phone, no login required for the customer.
     live "/pay/:id", PayLive

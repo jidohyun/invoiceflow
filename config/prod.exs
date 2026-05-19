@@ -8,14 +8,29 @@ import Config
 config :auto_my_invoice, AutoMyInvoiceWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json"
 
-# Force using SSL in production. This also sets the "strict-security-transport" header,
-# known as HSTS. If you have a health check endpoint, you may want to exclude it below.
-# Note `:force_ssl` is required to be set at compile-time.
+# AMI-17: Force HTTPS + HSTS.
+#
+# * `rewrite_on: [:x_forwarded_proto]` — Fly.io / Render / nginx
+#   terminate TLS at the edge and forward http inside the network.
+#   Without this the redirect loop is infinite.
+# * `hsts: true` + `expires: 31_536_000` + `subdomains: true`
+#   + `preload: true` — opts the apex domain in to the HSTS preload
+#   list (https://hstspreload.org). 1 year is the standard.
+# * `exclude` — health checks must respond on plain HTTP because
+#   load balancers probe before they know about TLS. Listing the
+#   hosts plus the /health path keeps Fly.io's probe and curl
+#   from the local network healthy.
+#
+# `:force_ssl` must be set at compile time — Plug.SSL is a compile-time
+# plug. Per-deploy host/origin overrides happen in runtime.exs.
 config :auto_my_invoice, AutoMyInvoiceWeb.Endpoint,
-  force_ssl: [rewrite_on: [:x_forwarded_proto]],
-  exclude: [
-    # paths: ["/health"],
-    hosts: ["localhost", "127.0.0.1"]
+  force_ssl: [
+    rewrite_on: [:x_forwarded_proto],
+    hsts: true,
+    expires: 31_536_000,
+    subdomains: true,
+    preload: true,
+    exclude: ["localhost", "127.0.0.1", "/health"]
   ]
 
 # Configure Swoosh API Client
