@@ -57,5 +57,18 @@ defmodule AutoMyInvoiceWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+
+  # AMI-20: CORS for /api/* (v1 endpoints, webhooks, track). Other paths
+  # are not browser-CORS-relevant (LiveView, server-rendered HTML).
+  # Corsica picks up the origin list lazily via MFA so we never need to
+  # recompile the endpoint to change it.
+  plug Corsica,
+    origins: [{AutoMyInvoiceWeb.Cors, :matches?}],
+    allow_credentials: true,
+    allow_headers: ["authorization", "content-type", "accept", "x-requested-with"],
+    allow_methods: ~w(GET POST PUT PATCH DELETE OPTIONS),
+    max_age: 600,
+    log: [rejected: :warn]
+
   plug AutoMyInvoiceWeb.Router
 end

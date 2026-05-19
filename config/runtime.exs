@@ -34,7 +34,10 @@ config :auto_my_invoice,
   paddle_api_key: System.get_env("PADDLE_API_KEY"),
   paddle_price_id_starter: System.get_env("PADDLE_PRICE_ID_STARTER"),
   paddle_price_id_pro: System.get_env("PADDLE_PRICE_ID_PRO"),
-  openai_api_key: System.get_env("OPENAI_API_KEY")
+  openai_api_key: System.get_env("OPENAI_API_KEY"),
+  # AMI-20: comma-separated origin allow-list. nil/empty → AutoMyInvoiceWeb.Cors
+  # falls back to :self in prod, "*" in dev.
+  cors_origins: System.get_env("CORS_ALLOWED_ORIGINS")
 
 # Sentry DSN — same reasoning. Sentry library happily accepts a nil DSN
 # (it short-circuits send), so dev/test stay quiet without any DSN set.

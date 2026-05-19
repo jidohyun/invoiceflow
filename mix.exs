@@ -65,6 +65,8 @@ defmodule AutoMyInvoice.MixProject do
       {:req, "~> 0.5"},
       # AMI-89: QR code generation for the "instant invoice" flow.
       {:eqrcode, "~> 0.2"},
+      # AMI-20: CORS for /api/v1 — mobile + 3rd-party API consumers.
+      {:corsica, "~> 2.1"},
 
       # 백그라운드 잡
       {:oban, "~> 2.17"},

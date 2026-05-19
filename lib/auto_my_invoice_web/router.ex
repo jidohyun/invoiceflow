@@ -15,11 +15,20 @@ defmodule AutoMyInvoiceWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    # AMI-20: CORS for /api/v1 + /api/webhooks (no harm on webhooks since
+    # third parties don't run JS). Origins are taken from `:cors_origins`
+    # in Application env — see config/runtime.exs for the env-var wiring.
+    plug Corsica,
+      origins: {AutoMyInvoiceWeb.Cors, :allowed_origins, []},
+      allow_credentials: true,
+      allow_headers: ["authorization", "content-type", "accept", "x-requested-with"],
+      max_age: 600,
+      log: [rejected: :warn]
   end
 
   pipeline :api_auth do
     plug :accepts, ["json"]
-    plug AutoMyInvoiceWeb.Plugs.ApiAuth
+plug AutoMyInvoiceWeb.Plugs.ApiAuth
   end
 
   # Webhook routes (no CSRF, no auth)
