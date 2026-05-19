@@ -67,6 +67,8 @@ defmodule AutoMyInvoice.MixProject do
       {:eqrcode, "~> 0.2"},
       # AMI-20: CORS for /api/v1 — mobile + 3rd-party API consumers.
       {:corsica, "~> 2.1"},
+      # AMI-15: in-memory rate limiting for /api/v1 (user) and /auth/* (IP).
+      {:hammer, "~> 7.0"},
 
       # 백그라운드 잡
       {:oban, "~> 2.17"},

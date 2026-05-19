@@ -28,7 +28,25 @@ defmodule AutoMyInvoiceWeb.Router do
 
   pipeline :api_auth do
     plug :accepts, ["json"]
-plug AutoMyInvoiceWeb.Plugs.ApiAuth
+    plug AutoMyInvoiceWeb.Plugs.ApiAuth
+    # AMI-15: 60 requests / minute / user. ApiAuth runs first so the user
+    # is in conn.assigns by the time RateLimit builds its bucket key.
+    plug AutoMyInvoiceWeb.Plugs.RateLimit,
+      bucket: :user,
+      name: "api_v1",
+      scale_ms: 60_000,
+      limit: 60
+  end
+
+  # AMI-15: per-IP brute-force guard for unauthenticated auth endpoints —
+  # 10 requests / minute / IP / endpoint. Used by the /auth/login and
+  # /auth/register routes below via a route-level pipe.
+  pipeline :api_auth_attempt do
+    plug AutoMyInvoiceWeb.Plugs.RateLimit,
+      bucket: :ip,
+      name: "auth_attempt",
+      scale_ms: 60_000,
+      limit: 10
   end
 
   # Webhook routes (no CSRF, no auth)
@@ -46,9 +64,9 @@ plug AutoMyInvoiceWeb.Plugs.ApiAuth
     get "/click/:reminder_id", EmailTrackingController, :click
   end
 
-  # Public API routes (no auth required)
+  # Public API routes (no auth required) — IP-throttled to slow brute force.
   scope "/api/v1", AutoMyInvoiceWeb.Api do
-    pipe_through :api
+    pipe_through [:api, :api_auth_attempt]
 
     post "/auth/register", AuthController, :register
     post "/auth/login", AuthController, :login

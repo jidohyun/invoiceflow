@@ -13,6 +13,9 @@ defmodule AutoMyInvoice.Application do
       {DNSCluster, query: Application.get_env(:auto_my_invoice, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AutoMyInvoice.PubSub},
       {Cachex, name: :auto_my_invoice_cache},
+      # AMI-15: ETS-backed rate limiter — single ETS table shared by all
+      # rate-limit keys (per-user API, per-IP auth).
+      AutoMyInvoice.RateLimiter,
       {Oban, Application.fetch_env!(:auto_my_invoice, Oban)},
       {ChromicPDF, Application.get_env(:auto_my_invoice, ChromicPDF, [])},
       AutoMyInvoiceWeb.Endpoint
