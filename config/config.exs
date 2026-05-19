@@ -70,9 +70,10 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
-# Configure Sentry
+# Configure Sentry — compile-time options only. `dsn` is injected at
+# runtime in config/runtime.exs so leaking the DSN into the compiled
+# release artifact never happens (AMI-13).
 config :sentry,
-  dsn: System.get_env("SENTRY_DSN"),
   environment_name: config_env(),
   enable_source_code_context: true,
   root_source_code_paths: [File.cwd!()],
@@ -86,14 +87,12 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Paddle Billing (for payments)
-config :auto_my_invoice, :paddle_webhook_secret, System.get_env("PADDLE_WEBHOOK_SECRET")
-config :auto_my_invoice, :paddle_api_key, System.get_env("PADDLE_API_KEY")
-config :auto_my_invoice, :paddle_price_id_starter, System.get_env("PADDLE_PRICE_ID_STARTER")
-config :auto_my_invoice, :paddle_price_id_pro, System.get_env("PADDLE_PRICE_ID_PRO")
-
-# OpenAI API (for OCR extraction)
-config :auto_my_invoice, :openai_api_key, System.get_env("OPENAI_API_KEY")
+# NOTE (AMI-13): All third-party secrets — Paddle, OpenAI, Sentry — are
+# injected at runtime in config/runtime.exs. config.exs runs at compile
+# time, and any System.get_env/1 call here would bake whatever the build
+# host happened to have (usually nothing) into the release artifact and
+# silently mask production env vars. See config/runtime.exs for the
+# canonical injection point.
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

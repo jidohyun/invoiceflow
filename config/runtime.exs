@@ -23,6 +23,23 @@ end
 config :auto_my_invoice, AutoMyInvoiceWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# ── Third-party API keys (AMI-13) ───────────────────────────────────
+# All secrets injected here, not in config.exs, so a release artifact
+# never contains baked-in values and prod env vars take effect on every
+# boot. Missing env vars produce `nil`; callers (PaddleClient,
+# VisionClient, PaddleWebhookController) already degrade gracefully.
+
+config :auto_my_invoice,
+  paddle_webhook_secret: System.get_env("PADDLE_WEBHOOK_SECRET"),
+  paddle_api_key: System.get_env("PADDLE_API_KEY"),
+  paddle_price_id_starter: System.get_env("PADDLE_PRICE_ID_STARTER"),
+  paddle_price_id_pro: System.get_env("PADDLE_PRICE_ID_PRO"),
+  openai_api_key: System.get_env("OPENAI_API_KEY")
+
+# Sentry DSN — same reasoning. Sentry library happily accepts a nil DSN
+# (it short-circuits send), so dev/test stay quiet without any DSN set.
+config :sentry, dsn: System.get_env("SENTRY_DSN")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
