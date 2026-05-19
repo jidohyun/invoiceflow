@@ -71,6 +71,8 @@ defmodule AutoMyInvoice.MixProject do
       {:corsica, "~> 2.1"},
       # AMI-15: in-memory rate limiting for /api/v1 (user) and /auth/* (IP).
       {:hammer, "~> 7.0"},
+      # AMI-19: HTTP client Sentry.FinchClient depends on.
+      {:finch, "~> 0.18"},
 
       # 백그라운드 잡
       {:oban, "~> 2.17"},

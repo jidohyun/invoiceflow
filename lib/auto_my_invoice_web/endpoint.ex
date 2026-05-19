@@ -70,5 +70,9 @@ defmodule AutoMyInvoiceWeb.Endpoint do
     max_age: 600,
     log: [rejected: :warn]
 
+  # AMI-19: attach request metadata (method, path, params, headers) to
+  # any Sentry event raised below. No-op when SENTRY_DSN is unset.
+  plug Sentry.PlugContext
+
   plug AutoMyInvoiceWeb.Router
 end
