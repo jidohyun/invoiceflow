@@ -46,7 +46,13 @@ defmodule AutoMyInvoiceWeb.Endpoint do
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
-    json_decoder: Phoenix.json_library()
+    json_decoder: Phoenix.json_library(),
+    # AMI-14: stash raw body on conn.assigns[:raw_body] so the Paddle
+    # webhook controller can recompute the HMAC-SHA256 signature
+    # against the exact bytes Paddle signed. Without this, Plug.Parsers
+    # consumes the body before the controller runs and signature
+    # verification can never succeed.
+    body_reader: {AutoMyInvoiceWeb.Plugs.RawBodyReader, :read_body, []}
 
   plug Plug.MethodOverride
   plug Plug.Head

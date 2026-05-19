@@ -11,7 +11,10 @@ config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
 config :auto_my_invoice,
   ecto_repos: [AutoMyInvoice.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  # AMI-14: makes Mix.env() reachable from runtime code (controllers,
+  # workers) which can't call Mix.* directly in a release.
+  env: config_env()
 
 # Configure the endpoint
 config :auto_my_invoice, AutoMyInvoiceWeb.Endpoint,
