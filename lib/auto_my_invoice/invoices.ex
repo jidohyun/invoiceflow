@@ -177,6 +177,16 @@ defmodule AutoMyInvoice.Invoices do
           })
 
         Mailer.deliver(email)
+
+        # AMI-91: issue 전자세금계산서 alongside the invoice email if the
+        # merchant ticked the box on the form. Idempotent — re-sending an
+        # already-issued invoice does not double-issue. Failures here do
+        # NOT roll back the email; they're logged on the TaxInvoice row
+        # for follow-up.
+        if sent_invoice.tax_invoice_requested do
+          _ = AutoMyInvoice.TaxInvoices.issue(sent_invoice)
+        end
+
         {:ok, sent_invoice}
 
       {:error, :mark_sent, changeset, _} ->

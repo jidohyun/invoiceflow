@@ -168,6 +168,18 @@ defmodule AutoMyInvoiceWeb.InvoiceLive.FormComponent do
 
         <.input field={@form[:notes]} type="textarea" label="메모" />
 
+        <%!-- AMI-91: tick to also issue a 전자세금계산서 alongside the email --%>
+        <label class="label cursor-pointer justify-start gap-3">
+          <.input
+            field={@form[:tax_invoice_requested]}
+            type="checkbox"
+            label="세금계산서 동시 발행"
+          />
+        </label>
+        <p class="text-xs text-base-content/60 -mt-2">
+          체크 시 송장 발송과 함께 전자세금계산서가 자동 발행됩니다 (KRW 송장은 3.3% 원천징수가 자동 표시됩니다).
+        </p>
+
         <div class="divider">품목</div>
 
         <div class="space-y-3">

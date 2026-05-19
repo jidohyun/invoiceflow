@@ -29,6 +29,10 @@ defmodule AutoMyInvoice.Invoices.Invoice do
     field :sent_at, :utc_datetime
     field :overdue_notified_at, :utc_datetime
 
+    # AMI-91: ticked on the invoice form to also issue a 전자세금계산서
+    # when the invoice is sent. send_invoice/1 reads this flag.
+    field :tax_invoice_requested, :boolean, default: false
+
     belongs_to :user, AutoMyInvoice.Accounts.User
     belongs_to :client, AutoMyInvoice.Clients.Client
 
@@ -48,7 +52,8 @@ defmodule AutoMyInvoice.Invoices.Invoice do
     :paid_amount,
     :sent_at,
     :overdue_notified_at,
-    :amount_krw
+    :amount_krw,
+    :tax_invoice_requested
   ]
 
   def create_changeset(invoice, attrs) do
